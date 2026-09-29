@@ -219,3 +219,6 @@ __marimo__/
 
 task/
 data/
+
+# Node
+node_modules/

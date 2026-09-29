@@ -9,6 +9,7 @@ As a developer, I want an empty API and an empty page that start with Podman and
 ## In scope
 
 - Makefile targets that build and start the API and the page with Podman.
+- Both containers join the Podman network `analitics_platform_network` and reach each other by container name.
 - `.env` read through pydantic-settings.
 - API process exposes a health response and nothing else.
 - React page in JavaScript loads and shows the product name only.

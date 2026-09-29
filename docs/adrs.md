@@ -14,7 +14,7 @@ Decisions for the internal analytics tool. Each record is accepted. Constraints 
 - PDF reports: reportlab, so the PDF path does not need a browser or system rendering libraries.
 - UI: one React page. Charts on the Dynamics card: a small line chart component. Internationalization: i18next, with catalogs `en.json` and `ru.json`.
 - Configuration: `.env` loaded by pydantic-settings.
-- Containers: Podman, invoked through the Makefile.
+- Containers: Podman, invoked through the Makefile. The API and the page join one network, `analitics_platform_network`, and reach each other there by container name (`analytics-api`, `analytics-web`). Host ports stay for the browser and the health check.
 
 Backend layout stays small:
 
