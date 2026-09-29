@@ -1,0 +1,54 @@
+.settings-tab {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 96px;
+  padding: 0;
+  border: 1px solid #e4e4e7;
+  border-right: 0;
+  border-radius: 48px 0 0 48px;
+  background: #fff;
+  color: #18181b;
+  cursor: pointer;
+}
+
+.settings-tab svg {
+  display: block;
+}
+
+.settings-scrim {
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.settings-panel {
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  height: calc(100% - var(--header-height));
+  overflow: hidden;
+  background: #fff;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.settings-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+}

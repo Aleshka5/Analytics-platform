@@ -57,5 +57,22 @@
     "title": "Choose a sheet",
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "settings": {
+    "open": "Data settings",
+    "apply": "Apply",
+    "matchAll": "Match all",
+    "matchAny": "Match any",
+    "addCondition": "Add condition",
+    "addSort": "Add sort",
+    "merged": "Merged cells",
+    "aggregated": "Aggregated rows",
+    "remove": "Remove",
+    "column": "Column",
+    "operator": "Operator",
+    "value": "Value",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "groupColumns": "Group columns"
   }
 }

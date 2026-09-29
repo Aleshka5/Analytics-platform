@@ -460,10 +460,16 @@ test("switching language refetches every section and shows the server insight", 
   await uploadReady("trades.csv", "ds-1");
   await playReport({ insight: "PnL decreased by 30.1%." });
 
+  fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+  fireEvent.click(screen.getByTestId("settings-add-condition"));
+  expect(screen.getByTestId("condition-column-0")).toHaveValue("Transaction_Date");
+
   fireEvent.click(screen.getByRole("button", { name: "RU" }));
   await waitFor(() => {
     expect(screen.getByTestId("card-preview")).toHaveAttribute("data-status", "loading");
   });
+  expect(screen.getByTestId("settings-apply")).toHaveTextContent("Применить");
+  expect(screen.getByTestId("condition-column-0").querySelectorAll("option")).toHaveLength(5);
 
   const seen = await playReport({
     lang: "ru",
@@ -484,4 +490,37 @@ test("switching language refetches every section and shows the server insight", 
     "Нет колонки с датой, пустых значений и категориальной колонки, которые можно описать.",
   );
   expect(screen.getByTestId("upload-button")).toHaveTextContent("Заменить файл");
+});
+
+test("apply in data settings does not fetch and escape returns focus without changing the preview", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  await playReport({ insight: "Stable insight." });
+
+  const tab = screen.getByRole("button", { name: "Data settings" });
+  expect(tab).toBeInTheDocument();
+  expect(tab).toHaveAttribute("data-testid", "settings-tab");
+
+  const fetchSpy = vi.spyOn(globalThis, "fetch");
+  fireEvent.click(tab);
+  const sectionCalls = fetchSection.mock.calls.length;
+
+  fireEvent.click(screen.getByTestId("settings-add-condition"));
+  expect(screen.getByTestId("condition-column-0")).toBeInTheDocument();
+
+  fireEvent.click(screen.getByTestId("settings-apply"));
+  expect(fetchSpy).not.toHaveBeenCalled();
+  expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
+  expect(screen.getByTestId("condition-column-0")).toBeInTheDocument();
+
+  const previewText = screen.getByTestId("card-preview").textContent;
+  fireEvent.keyDown(document, { key: "Escape" });
+  expect(screen.getByTestId("settings-tab")).toHaveFocus();
+  expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
+  expect(screen.getByTestId("card-preview").textContent).toBe(previewText);
+  expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
+
+  fireEvent.click(screen.getByTestId("settings-tab"));
+  expect(screen.queryByTestId("condition-column-0")).not.toBeInTheDocument();
+  fetchSpy.mockRestore();
 });

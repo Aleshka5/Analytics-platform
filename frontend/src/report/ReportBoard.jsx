@@ -86,7 +86,7 @@ function StatusCard({ card, title }) {
   );
 }
 
-export default function ReportBoard({ datasetId, lang, titles, labels }) {
+export default function ReportBoard({ datasetId, lang, titles, labels, onColumns }) {
   const [cards, setCards] = useState(initialCards);
   const [choices, setChoices] = useState(EMPTY_CHOICES);
   const [trackedDatasetId, setTrackedDatasetId] = useState(datasetId);
@@ -96,11 +96,18 @@ export default function ReportBoard({ datasetId, lang, titles, labels }) {
   const overridesRef = useRef({});
   const generationRef = useRef(0);
   const activeDatasetRef = useRef(datasetId);
+  const onColumnsRef = useRef(onColumns);
+  const reportedColumnsKeyRef = useRef(null);
+  const columnsStaleRef = useRef(false);
+  const settingsColumnsRef = useRef([]);
   const empty = labels.empty;
 
   activeDatasetRef.current = datasetId;
+  onColumnsRef.current = onColumns;
 
   if (trackedDatasetId !== datasetId) {
+    // The previous dataset's cards stay mounted until the load effect replaces them.
+    columnsStaleRef.current = true;
     generationRef.current += 1;
     setTrackedDatasetId(datasetId);
     setChoices(EMPTY_CHOICES);
@@ -110,6 +117,7 @@ export default function ReportBoard({ datasetId, lang, titles, labels }) {
   }
 
   useEffect(() => {
+    columnsStaleRef.current = false;
     const generation = generationRef.current;
     overridesRef.current = {};
     setCards(initialCards());
@@ -186,6 +194,30 @@ export default function ReportBoard({ datasetId, lang, titles, labels }) {
 
   const columnsCard = cards.find((card) => card.name === "columns" && card.phase === "ok");
   const columnList = columnsCard?.body?.data?.columns ?? [];
+  if (columnsStaleRef.current) {
+    settingsColumnsRef.current = [];
+  } else if (columnsCard) {
+    settingsColumnsRef.current = columnList.map((column) => ({
+      name: column.name,
+      role: column.role,
+    }));
+  }
+  const settingsColumnsKey = `${datasetId}\n${settingsColumnsRef.current
+    .map((column) => `${column.name}:${column.role}`)
+    .join("\n")}`;
+
+  useEffect(() => {
+    const notify = onColumnsRef.current;
+    if (typeof notify !== "function") {
+      return;
+    }
+    if (reportedColumnsKeyRef.current === settingsColumnsKey) {
+      return;
+    }
+    reportedColumnsKeyRef.current = settingsColumnsKey;
+    notify(settingsColumnsRef.current);
+  }, [settingsColumnsKey]);
+
   const roles = Object.fromEntries(columnList.map((column) => [column.name, column.role]));
   const options = columnsCard
     ? selectorsFromColumns(columnsCard.body)

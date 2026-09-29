@@ -7,6 +7,9 @@ import SheetDialog from "./components/SheetDialog";
 import UploadZone from "./components/UploadZone";
 import { deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
 import ReportBoard from "./report/ReportBoard";
+import { emptyDraft } from "./sidebar/draft";
+import SettingsForm from "./sidebar/SettingsForm";
+import SettingsSidebar from "./sidebar/SettingsSidebar";
 import { cancelSheet, confirmSheet, uploadFile } from "./upload/session";
 
 const CARD_TITLE_KEYS = [
@@ -58,6 +61,9 @@ const CARD_LABEL_KEYS = [
 export default function App() {
   const { t, i18n } = useTranslation();
   const [datasetId, setDatasetId] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsDraft, setSettingsDraft] = useState(() => emptyDraft());
+  const [settingsColumns, setSettingsColumns] = useState([]);
   const [busy, setBusy] = useState(false);
   const [serverMessage, setServerMessage] = useState(null);
   const [sheetPrompt, setSheetPrompt] = useState(null);
@@ -69,6 +75,22 @@ export default function App() {
     selectSheet: (id, sheet) => selectSheet(id, sheet, { lang: locale }),
     deleteDataset: (id) => deleteDataset(id, { lang: locale }),
   };
+
+  function setActiveDataset(nextId) {
+    if (nextId !== datasetId) {
+      setSettingsDraft(emptyDraft());
+      setSettingsColumns([]);
+      setSettingsOpen(false);
+    }
+    setDatasetId(nextId);
+  }
+
+  function handleSettingsApply() {}
+
+  function closeSettings() {
+    setSettingsOpen(false);
+    setSettingsDraft(emptyDraft());
+  }
 
   function openSheet(prompt) {
     sheetRef.current = prompt;
@@ -105,7 +127,7 @@ export default function App() {
       return;
     }
     if (result.status === "ready") {
-      setDatasetId(result.datasetId);
+      setActiveDataset(result.datasetId);
     }
   }
 
@@ -133,7 +155,7 @@ export default function App() {
     }
 
     closeSheet();
-    setDatasetId(result.datasetId);
+    setActiveDataset(result.datasetId);
   }
 
   async function handleCancel() {
@@ -152,7 +174,7 @@ export default function App() {
     busyRef.current = false;
     setBusy(false);
     closeSheet();
-    setDatasetId(result.datasetId);
+    setActiveDataset(result.datasetId);
     if (!result.ok && result.message) {
       setServerMessage(result.message);
     }
@@ -190,7 +212,23 @@ export default function App() {
         />
       ) : null}
       {datasetId ? (
-        <ReportBoard datasetId={datasetId} lang={locale} titles={titles} labels={labels} />
+        <ReportBoard
+          datasetId={datasetId}
+          lang={locale}
+          titles={titles}
+          labels={labels}
+          onColumns={setSettingsColumns}
+        />
+      ) : null}
+      {datasetId ? (
+        <SettingsSidebar open={settingsOpen} onOpen={() => setSettingsOpen(true)} onClose={closeSettings}>
+          <SettingsForm
+            columns={settingsColumns}
+            draft={settingsDraft}
+            onChange={setSettingsDraft}
+            onApply={handleSettingsApply}
+          />
+        </SettingsSidebar>
       ) : null}
     </>
   );

@@ -1,0 +1,40 @@
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section,
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-choice {
+  flex-direction: row;
+  align-items: center;
+}
+
+.settings-form fieldset {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #e4e4e7;
+}
+
+.settings-form select,
+.settings-form input:not([type="radio"]):not([type="checkbox"]),
+.settings-form button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-form button[type="button"] {
+  position: static;
+}

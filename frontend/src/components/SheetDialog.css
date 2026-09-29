@@ -1,4 +1,6 @@
 .sheet-dialog {
+  position: relative;
+  z-index: 5;
   background: #fff;
   border: 1px solid #e4e4e7;
   border-radius: 12px;
