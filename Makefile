@@ -19,5 +19,5 @@ down:
 test:
 	test -f .env || cp .env.example .env
 	$(COMPOSE) build
-	$(COMPOSE) run --rm -T --no-deps analytics-api pytest
+	$(COMPOSE) run --rm -T --no-deps -v "$(CURDIR)/data:/data:ro" analytics-api pytest
 	$(COMPOSE) run --rm -T --no-deps analytics-web npm test

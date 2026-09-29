@@ -268,13 +268,13 @@ This section stays `ok` for every ready dataset, because upload already rejected
       },
       {
         "name": "Client_ID",
-        "dtype": "object",
+        "dtype": "str",
         "role": "text",
         "unique_count": 50
       },
       {
         "name": "Region",
-        "dtype": "object",
+        "dtype": "str",
         "role": "category",
         "unique_count": 7
       },
@@ -329,7 +329,7 @@ This section stays `ok` for every ready dataset, because upload already rejected
 }
 ```
 
-`dtype` is the pandas dtype string. `role` is the inferred role.
+`dtype` is the pandas dtype string. String columns are `str`. `role` is the inferred role.
 
 <a id="missing"></a>
 
@@ -564,6 +564,12 @@ Then `kind` is `distribution` and `items` are built in this order, still capped 
 1. Up to three columns with `missing_pct` > 0, largest share first. `code` is `missing_share`.
 2. One sentence for the suggested category: its most frequent value and that value's share of rows. `code` is `top_category`.
 
+The percent in `text` is one fraction digit. Russian uses a comma.
+
+`missing_share`: "{column} is empty in {pct}% of rows." Russian: «{column} пуст в {pct}% строк.»
+
+`top_category`: "{value} is the most frequent value in {column} ({pct}% of rows)." Russian: «{value} — самое частое значение в {column} ({pct}% строк).»
+
 If that list is empty, the section is `unavailable` with `no_insight_inputs`.
 
 | HTTP | Result | When |
@@ -711,9 +717,13 @@ Plus the [shared errors](#shared-errors).
 
 <a id="message-catalog"></a>
 
-## Unavailable codes
+## Message catalog
 
-These codes appear in section envelopes. The English `message` is the source sentence. The Russian `message` is what `lang=ru` returns.
+The English sentence is the source. The Russian sentence is what `lang=ru` returns. Column names from the file are never translated.
+
+### Unavailable codes
+
+These codes appear in section envelopes.
 
 | `code` | English message |
 | --- | --- |
@@ -732,3 +742,43 @@ These codes appear in section envelopes. The English `message` is the source sen
 | `metric_all_null` | В выбранной метрике только пустые значения. |
 | `no_dated_rows` | В колонке даты нет значений, которые можно построить. |
 | `no_insight_inputs` | Нет колонки с датой, пустых значений и категориальной колонки, которые можно описать. |
+
+### Error messages
+
+These codes appear in the [error body](#conventions).
+
+| `code` | English message |
+| --- | --- |
+| `dataset_not_found` | The dataset was not found. |
+| `sheet_required` | Choose a worksheet before analysis. |
+| `internal_error` | Something went wrong. |
+| `invalid_language` | The language is not supported. |
+| `missing_file` | No file was uploaded. |
+| `file_too_large` | The file is larger than 100 MB. |
+| `unsupported_format` | This file type is not supported. |
+| `empty_file` | The file is empty. |
+| `unreadable_file` | The file could not be read. |
+| `encoding_error` | The text encoding could not be detected. |
+| `not_a_table` | The file is not a table of records. |
+| `no_data_rows` | The table has a header and no data rows. |
+| `sheet_not_found` | The worksheet was not found. |
+| `already_ready` | A sheet is already selected. Upload another file to change the source. |
+| `invalid_column` | The column is unknown or cannot be used here. |
+
+| `code` | Russian message |
+| --- | --- |
+| `dataset_not_found` | Набор данных не найден. |
+| `sheet_required` | Выберите лист перед анализом. |
+| `internal_error` | Что-то пошло не так. |
+| `invalid_language` | Язык не поддерживается. |
+| `missing_file` | Файл не был загружен. |
+| `file_too_large` | Файл больше 100 МБ. |
+| `unsupported_format` | Этот тип файла не поддерживается. |
+| `empty_file` | Файл пуст. |
+| `unreadable_file` | Файл не удалось прочитать. |
+| `encoding_error` | Не удалось определить кодировку текста. |
+| `not_a_table` | Файл не является таблицей записей. |
+| `no_data_rows` | В таблице есть заголовок и нет строк данных. |
+| `sheet_not_found` | Лист не найден. |
+| `already_ready` | Лист уже выбран. Загрузите другой файл, чтобы сменить источник. |
+| `invalid_column` | Колонка неизвестна или не подходит для этого запроса. |

@@ -208,4 +208,4 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `sheet.confirm` | Confirm | Подтвердить |
 | `sheet.cancel` | Cancel | Отмена |
 
-Section titles are in the [report sequence](#report-sequence) table. Insight sentences and unavailable messages are the API strings in [the message catalog](api-contract.md#message-catalog).
+Section titles are in the [report sequence](#report-sequence) table. Insight sentences, unavailable messages, and error messages are the API strings in [the message catalog](api-contract.md#message-catalog).
