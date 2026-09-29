@@ -95,6 +95,42 @@ def message(code: str, lang: str) -> str:
     return table.get(lang, table["en"])
 
 
+_QUERY_ERRORS: dict[str, dict[str, str]] = {
+    "invalid_filter": {
+        "en": "The filter is invalid.",
+        "ru": "Фильтр некорректен.",
+    },
+    "invalid_sort": {
+        "en": "The sort is invalid.",
+        "ru": "Сортировка некорректна.",
+    },
+    "invalid_group": {
+        "en": "The grouping is invalid.",
+        "ru": "Группировка некорректна.",
+    },
+    "invalid_page": {
+        "en": "The page is invalid.",
+        "ru": "Страница некорректна.",
+    },
+}
+
+
+def query_error_message(code: str, lang: str, index: int | None = None) -> str:
+    """Return the sentence for a row-query rejection.
+
+    Unknown languages fall back to English. An `invalid_filter` with a
+    condition index names that condition.
+    """
+
+    language = lang if lang in ("en", "ru") else "en"
+    if code == "invalid_filter" and index is not None:
+        if language == "ru":
+            return f"Условие {index} некорректно."
+        return f"Condition {index} is invalid."
+    table = _QUERY_ERRORS[code]
+    return table[language]
+
+
 def _percent(value: float, lang: str) -> str:
     rendered = f"{abs(value):.1f}"
     if lang == "ru":
