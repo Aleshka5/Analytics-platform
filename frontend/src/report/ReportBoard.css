@@ -1,0 +1,51 @@
+.report-board {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.report-board section {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.report-board section[data-status="unavailable"] {
+  background: #fef3f2;
+  border-color: #b42318;
+}
+
+.report-board section[data-status="unavailable"] p {
+  color: #b42318;
+}
+
+.report-board th,
+.report-board td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.report-board h2 {
+  margin-top: 0;
+}
+
+.report-board table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.report-board select {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.report-board svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

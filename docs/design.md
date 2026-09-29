@@ -24,7 +24,7 @@ Changing the language does three things:
 
 Top to bottom:
 
-1. Header: product name and the language switch. The header stays visible while the page scrolls.
+1. Header: product name **Analytics Platform** / **Аналитическая платформа**, and the language switch. The header stays visible while the page scrolls.
 2. Upload zone, full width of the page.
 3. Report cards, in the [call order](api-contract.md#conventions), stacked with a gap between them.
 4. Nothing else in the document flow. The settings tab, the data window, and the report export button are attached to the viewport.
@@ -42,7 +42,7 @@ The same action accepts a file in two ways:
 - Drop anywhere on the dashed area.
 - Activate the button and use the native file picker. The picker `accept` list is `.csv,.tsv,.xlsx,.xls,.json,.parquet`.
 
-The browser refuses a file larger than 100 MB before the request, with the localized `file_too_large` sentence under the button. The server repeats that check.
+The browser refuses a file larger than 100 MB before the request, with the localized `file_too_large` sentence under the button. The server repeats that check. An extension outside the allowed list shows the localized `unsupported_format` sentence under the button, and the zone stays as it was.
 
 While the upload request is in flight, the button is disabled and shows a progress label.
 
@@ -54,7 +54,7 @@ Replace uploads the new file first. Only a `ready` response, or a finished sheet
 
 ### Several worksheets
 
-When the upload returns `sheet_required`, a dialog lists `sheets`. The zone stays expanded and the report does not start. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
+When the upload returns `sheet_required`, a dialog lists `sheets`. The zone stays expanded and the report does not start. The actions are **Confirm** / **Подтвердить** and **Cancel** / **Отмена**. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
 
 <a id="report-sequence"></a>
 
@@ -183,9 +183,11 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 
 | Key | English | Russian |
 | --- | --- | --- |
+| `header.title` | Analytics Platform | Аналитическая платформа |
 | `upload.action` | Upload file | Загрузить файл |
 | `upload.replace` | Replace file | Заменить файл |
 | `upload.tooLarge` | The file is larger than 100 MB. | Файл больше 100 МБ. |
+| `upload.unsupported` | This file type is not supported. | Этот тип файла не поддерживается. |
 | `settings.open` | Data settings | Настройки данных |
 | `settings.apply` | Apply | Применить |
 | `settings.matchAll` | Match all | Все условия |
@@ -203,5 +205,7 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `export.json` | JSON | JSON |
 | `export.pdf` | PDF | PDF |
 | `sheet.title` | Choose a sheet | Выберите лист |
+| `sheet.confirm` | Confirm | Подтвердить |
+| `sheet.cancel` | Cancel | Отмена |
 
 Section titles are in the [report sequence](#report-sequence) table. Insight sentences and unavailable messages are the API strings in [the message catalog](api-contract.md#message-catalog).

@@ -7,3 +7,4 @@ Rules:
 6. Keep it simple
 7. Do not repeat yourself
 8. All code, comments, docs ONLY in English
+9. Make every new US in a new branch named as Us

@@ -1,0 +1,61 @@
+{
+  "header": { "title": "Analytics Platform" },
+  "upload": {
+    "action": "Upload file",
+    "replace": "Replace file",
+    "tooLarge": "The file is larger than 100 MB.",
+    "unsupported": "This file type is not supported."
+  },
+  "cards": {
+    "preview": "Preview",
+    "columns": "Columns",
+    "size": "Size",
+    "dtypes": "Data types",
+    "missing": "Missing values",
+    "summary": "Summary",
+    "ranking": "Top and worst",
+    "grouping": "Grouping",
+    "timeseries": "Dynamics",
+    "insights": "Insights"
+  },
+  "card": {
+    "rowCount": "Row count",
+    "columnCount": "Column count",
+    "top": "Top",
+    "worst": "Worst",
+    "metric": "Metric",
+    "category": "Category",
+    "date": "Date",
+    "truncated": "The list stops at 100 groups.",
+    "name": "Name",
+    "role": "Role",
+    "distinct": "Distinct",
+    "dtype": "Type",
+    "missingCount": "Missing",
+    "missingPercent": "Missing %",
+    "filled": "Filled",
+    "numeric": "Numeric",
+    "other": "Other columns",
+    "count": "Count",
+    "mean": "Mean",
+    "std": "Std",
+    "min": "Min",
+    "p25": "25%",
+    "p50": "50%",
+    "p75": "75%",
+    "max": "Max",
+    "unique": "Unique",
+    "topValue": "Top value",
+    "frequency": "Frequency",
+    "value": "Value",
+    "sum": "Sum"
+  },
+  "unavailable": {
+    "no_insight_inputs": "There is no date column, no empty values, and no categorical column to describe."
+  },
+  "sheet": {
+    "title": "Choose a sheet",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
+}
