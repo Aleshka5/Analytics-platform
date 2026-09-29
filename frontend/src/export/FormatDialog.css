@@ -1,0 +1,55 @@
+.format-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.format-dialog {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.format-dialog-title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.format-error {
+  margin: 12px 0 0;
+  color: #b42318;
+}
+
+.format-dialog-formats {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.format-dialog-button,
+.format-dialog-dismiss {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.format-dialog-button {
+  background: #18181b;
+  color: #fff;
+  border: 1px solid #18181b;
+}
+
+.format-dialog-dismiss {
+  background: #fff;
+  color: #18181b;
+  border: 1px solid #e4e4e7;
+}

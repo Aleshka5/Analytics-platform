@@ -1,3 +1,4 @@
+import TableExport from "../export/TableExport";
 import DataTable from "./DataTable";
 import ZoomSurface from "./ZoomSurface";
 import "./DataWindow.css";
@@ -12,6 +13,11 @@ export default function DataWindow({
   hasMore,
   onReachEnd,
   onClose,
+  exportLabels,
+  exportError,
+  exportBusy,
+  onExport,
+  onExportDismiss,
 }) {
   return (
     <div
@@ -40,6 +46,15 @@ export default function DataWindow({
           locale={locale}
         />
       </ZoomSurface>
+      {onExport ? (
+        <TableExport
+          labels={exportLabels}
+          errorMessage={exportError}
+          busy={exportBusy}
+          onExport={onExport}
+          onDismiss={onExportDismiss}
+        />
+      ) : null}
     </div>
   );
 }

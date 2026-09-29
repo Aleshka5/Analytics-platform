@@ -47,8 +47,8 @@
 
 .zoom-surface-controls {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
+  right: 16px;
+  bottom: 64px;
   z-index: 1;
   display: flex;
   gap: 4px;

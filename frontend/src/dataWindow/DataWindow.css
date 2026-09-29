@@ -22,7 +22,7 @@
   }
 }
 
-.data-window > :not(.data-window-close) {
+.data-window > :not(.data-window-close):not(.table-export):not(.format-scrim) {
   flex: 1;
   min-height: 0;
   overflow: hidden;

@@ -6,10 +6,12 @@ import Header from "./components/Header";
 import SheetDialog from "./components/SheetDialog";
 import UploadZone from "./components/UploadZone";
 import { ApiError, deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
+import { downloadReport, downloadRows } from "./api/exports";
 import { fetchRows } from "./api/rows";
 import { appendRowsPage } from "./dataWindow/appendPage";
 import DataWindow from "./dataWindow/DataWindow";
 import { draftToQueryBody } from "./query/requestBody";
+import ReportExportButton from "./export/ReportExportButton";
 import ReportBoard from "./report/ReportBoard";
 import { emptyDraft } from "./sidebar/draft";
 import SettingsForm from "./sidebar/SettingsForm";
@@ -72,6 +74,10 @@ export default function App() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [windowOpen, setWindowOpen] = useState(false);
   const [applyError, setApplyError] = useState(null);
+  const [reportSettled, setReportSettled] = useState(false);
+  const [reportExportError, setReportExportError] = useState(null);
+  const [tableExportError, setTableExportError] = useState(null);
+  const [tableExportBusy, setTableExportBusy] = useState(false);
   const [settingsColumns, setSettingsColumns] = useState([]);
   const [busy, setBusy] = useState(false);
   const [serverMessage, setServerMessage] = useState(null);
@@ -104,6 +110,10 @@ export default function App() {
       setLoadingMore(false);
       setWindowOpen(false);
       setApplyError(null);
+      setReportSettled(false);
+      setReportExportError(null);
+      setTableExportError(null);
+      setTableExportBusy(false);
     }
     datasetIdRef.current = nextId;
     setDatasetId(nextId);
@@ -279,7 +289,43 @@ export default function App() {
     }
   }
 
+  function exportMessage(error) {
+    return error instanceof Error && error.message ? error.message : "Request failed";
+  }
+
+  async function handleReportExport(format) {
+    setReportExportError(null);
+    try {
+      await downloadReport(datasetId, { format, lang: locale });
+    } catch (error) {
+      setReportExportError(exportMessage(error));
+      throw error;
+    }
+  }
+
+  async function handleTableExport(format) {
+    const body = dataWindowRef.current && dataWindowRef.current.body;
+    setTableExportError(null);
+    setTableExportBusy(true);
+    try {
+      await downloadRows(datasetId, body, { format, lang: locale });
+    } catch (error) {
+      setTableExportError(exportMessage(error));
+      throw error;
+    } finally {
+      setTableExportBusy(false);
+    }
+  }
+
   const titles = Object.fromEntries(CARD_TITLE_KEYS.map((key) => [key, t(`cards.${key}`)]));
+  const exportLabels = {
+    action: t("export.action"),
+    excel: t("export.excel"),
+    csv: t("export.csv"),
+    json: t("export.json"),
+    pdf: t("export.pdf"),
+    close: t("table.close"),
+  };
   const labels = {
     ...Object.fromEntries(CARD_LABEL_KEYS.map((key) => [key, t(`card.${key}`)])),
     empty: "\u2014",
@@ -317,6 +363,7 @@ export default function App() {
           titles={titles}
           labels={labels}
           onColumns={setSettingsColumns}
+          onSettled={setReportSettled}
         />
       ) : null}
       {datasetId ? (
@@ -330,6 +377,14 @@ export default function App() {
           />
         </SettingsSidebar>
       ) : null}
+      {datasetId ? (
+        <ReportExportButton
+          settled={reportSettled}
+          labels={exportLabels}
+          errorMessage={reportExportError}
+          onConfirm={handleReportExport}
+        />
+      ) : null}
       {datasetId && windowOpen && dataWindow ? (
         <DataWindow
           columns={dataWindow.loaded.columns}
@@ -341,6 +396,11 @@ export default function App() {
             close: t("table.close"),
             empty: t("table.empty"),
           }}
+          exportLabels={exportLabels}
+          exportError={tableExportError}
+          exportBusy={tableExportBusy}
+          onExport={handleTableExport}
+          onExportDismiss={() => setTableExportError(null)}
           hasMore={
             !loadingMore && dataWindow.loaded.page < dataWindow.loaded.total_pages
           }

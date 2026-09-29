@@ -78,5 +78,12 @@
   "table": {
     "close": "Close",
     "empty": "No rows match these settings"
+  },
+  "export": {
+    "action": "Export",
+    "excel": "Excel",
+    "csv": "CSV",
+    "json": "JSON",
+    "pdf": "PDF"
   }
 }

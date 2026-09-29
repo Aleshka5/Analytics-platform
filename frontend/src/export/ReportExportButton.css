@@ -1,0 +1,67 @@
+.report-export {
+  position: fixed;
+  z-index: 0;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: #18181b;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 8px 24px rgba(24, 24, 27, 0.12);
+  cursor: pointer;
+}
+
+.report-export-pill {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+}
+
+.report-export-circle {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.report-export:disabled {
+  cursor: default;
+}
+
+.report-export-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.report-export-arc {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.report-export-arc circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-dashoffset: 0;
+  animation: report-export-drain 10s linear forwards;
+}
+
+@keyframes report-export-drain {
+  to {
+    stroke-dashoffset: 125.664;
+  }
+}

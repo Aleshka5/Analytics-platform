@@ -78,5 +78,12 @@
   "table": {
     "close": "Закрыть",
     "empty": "Нет строк по этим настройкам"
+  },
+  "export": {
+    "action": "Экспорт",
+    "excel": "Excel",
+    "csv": "CSV",
+    "json": "JSON",
+    "pdf": "PDF"
   }
 }

@@ -687,3 +687,90 @@ test("a later 422 does not replace an open window", async () => {
     rows.restore();
   }
 });
+
+test("the report button waits for every card, including a red one, then downloads with lang", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  expect(screen.queryByTestId("report-export")).not.toBeInTheDocument();
+
+  await resolveNext("preview", {});
+  expect(screen.queryByTestId("report-export")).not.toBeInTheDocument();
+
+  for (const section of SECTION_ORDER.slice(1)) {
+    expect(screen.queryByTestId("report-export")).not.toBeInTheDocument();
+    await resolveNext(section, {
+      timeseriesUnavailable: true,
+      insight: "Insight after dynamics.",
+    });
+  }
+
+  expect(screen.getByTestId("card-timeseries")).toHaveAttribute("data-status", "unavailable");
+  const button = screen.getByTestId("report-export");
+  expect(button).toHaveAttribute("data-state", "pill");
+
+  const previous = globalThis.fetch;
+  const recorded = [];
+  globalThis.fetch = vi.fn(async (url, init = {}) => {
+    recorded.push({ url: String(url), method: init.method });
+    return new Response(new Blob(["pdf"]), {
+      status: 200,
+      headers: { "Content-Disposition": 'attachment; filename="trades.pdf"' },
+    });
+  });
+
+  try {
+    fireEvent.click(button);
+    fireEvent.click(screen.getByTestId("format-dismiss"));
+    expect(recorded).toHaveLength(0);
+    expect(button).toBeEnabled();
+
+    fireEvent.click(button);
+    fireEvent.click(screen.getByTestId("format-pdf"));
+    await waitFor(() => {
+      expect(recorded).toHaveLength(1);
+    });
+    expect(recorded[0].method).toBe("GET");
+    expect(recorded[0].url).toBe("/api/v1/datasets/ds-1/report?format=pdf&lang=en");
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("data-state", "cooldown");
+  } finally {
+    globalThis.fetch = previous;
+  }
+});
+
+test("table export posts the applied body without a page", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  await playReport({ insight: "Stable insight." });
+  stubMatchMedia();
+
+  const rows = mockRowsFetch((call) => {
+    if (call.url.includes("/rows/export")) {
+      return new Response(new Blob(["Region\nUAE\n"]), {
+        status: 200,
+        headers: { "Content-Disposition": 'attachment; filename="trades.csv"' },
+      });
+    }
+    return jsonResponse(200, rowsPayload({ page: 1, totalPages: 1, region: "UAE" }));
+  });
+
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+    fireEvent.click(screen.getByTestId("settings-apply"));
+    expect(await screen.findByTestId("data-window")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("table-export"));
+    fireEvent.click(screen.getByTestId("format-csv"));
+
+    await waitFor(() => {
+      expect(rows.recorded.some((call) => call.url.includes("/rows/export"))).toBe(true);
+    });
+    const exported = rows.recorded.find((call) => call.url.includes("/rows/export"));
+    expect(exported.method).toBe("POST");
+    expect(exported.url).toBe("/api/v1/datasets/ds-1/rows/export?format=csv&lang=en");
+    expect(exported.body.page).toBeUndefined();
+    expect(exported.body.filter).toBeNull();
+  } finally {
+    rows.restore();
+  }
+});

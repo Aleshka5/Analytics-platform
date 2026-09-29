@@ -3,6 +3,7 @@ import { fetchSection } from "../api/datasets";
 import "./ReportBoard.css";
 import { formatDate, formatNumber } from "./format";
 import LineChart from "./LineChart";
+import { cardsSettled } from "./cardsSettled";
 import { initialCards, loadOne, runSequence, selectorsFromColumns } from "./sequence";
 
 const NUMERIC_STATS = ["count", "mean", "std", "min", "p25", "p50", "p75", "max"];
@@ -86,7 +87,7 @@ function StatusCard({ card, title }) {
   );
 }
 
-export default function ReportBoard({ datasetId, lang, titles, labels, onColumns }) {
+export default function ReportBoard({ datasetId, lang, titles, labels, onColumns, onSettled }) {
   const [cards, setCards] = useState(initialCards);
   const [choices, setChoices] = useState(EMPTY_CHOICES);
   const [trackedDatasetId, setTrackedDatasetId] = useState(datasetId);
@@ -97,6 +98,7 @@ export default function ReportBoard({ datasetId, lang, titles, labels, onColumns
   const generationRef = useRef(0);
   const activeDatasetRef = useRef(datasetId);
   const onColumnsRef = useRef(onColumns);
+  const onSettledRef = useRef(onSettled);
   const reportedColumnsKeyRef = useRef(null);
   const columnsStaleRef = useRef(false);
   const settingsColumnsRef = useRef([]);
@@ -104,6 +106,7 @@ export default function ReportBoard({ datasetId, lang, titles, labels, onColumns
 
   activeDatasetRef.current = datasetId;
   onColumnsRef.current = onColumns;
+  onSettledRef.current = onSettled;
 
   if (trackedDatasetId !== datasetId) {
     // The previous dataset's cards stay mounted until the load effect replaces them.
@@ -205,6 +208,13 @@ export default function ReportBoard({ datasetId, lang, titles, labels, onColumns
   const settingsColumnsKey = `${datasetId}\n${settingsColumnsRef.current
     .map((column) => `${column.name}:${column.role}`)
     .join("\n")}`;
+
+  useEffect(() => {
+    const notify = onSettledRef.current;
+    if (typeof notify === "function") {
+      notify(cardsSettled(cards));
+    }
+  }, [cards]);
 
   useEffect(() => {
     const notify = onColumnsRef.current;
