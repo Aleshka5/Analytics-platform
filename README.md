@@ -11,3 +11,7 @@ Test Task for FreeDom
 The health check is `http://localhost:8000/health` (the port is `API_PORT` in `.env`). The page is `http://localhost:5173` (the host port is `WEB_PORT` in `.env`; the container still listens on 5173).
 
 Both containers join the Podman network `analitics_platform_network`. On that network the API name is `analytics-api` and the page name is `analytics-web`.
+
+## Claude Code UI tooling
+
+`.mcp.json` adds the Playwright MCP server, so Claude can open the page at `http://localhost:5173`, click through it, and take screenshots while working on the UI. It needs Node.js (`npx`). If Playwright's own Chromium is not installed, set `PLAYWRIGHT_MCP_EXECUTABLE_PATH` to a Chromium binary (in Claude Code on the web: `/opt/pw-browsers/chromium`).
