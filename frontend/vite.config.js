@@ -22,12 +22,14 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    allowedHosts: ["freedom.filenkov.store"],
     proxy: apiProxy,
     allowedHosts,
   },
   preview: {
     host: "0.0.0.0",
     port: 5173,
+    allowedHosts: ["freedom.filenkov.store"],
     proxy: apiProxy,
     allowedHosts,
   },

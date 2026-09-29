@@ -72,7 +72,7 @@ Open the page, drop a file, and the report fills in one card at a time. There is
 
 Ideas that would make the current product more reliable or more useful. None of them are in scope of the shipped behavior.
 
-- **Shared dataset store.** Parsed tables live in one API process. A restart drops them, and a second worker cannot see uploads handled by the first. Redis (or another shared store) keyed by `dataset_id`, with the same 60-minute TTL, would keep the HTTP contract and survive a restart. See [docs/for-future.md](docs/for-future.md).
+- **Shared dataset store.** Parsed tables live in the memory of one API process for 60 minutes ([ADR 004](docs/adrs.md#adr-004)). A restart drops every dataset, and a second worker cannot see uploads handled by the first. Redis can replace that store: the key is `dataset_id`, the value is the serialized table plus the filename, sheet name, and role metadata, and the key TTL stays 60 minutes. Any worker can then serve `GET` and `POST` for an id created by another worker, and a restart keeps datasets until their TTL. Callers still use `dataset_id`, `expires_at`, and `DELETE`.
 - **Access control.** Anyone who has a dataset id can read it until it expires. Accounts, or a short-lived token bound to the upload, would stop that id from acting as a bearer secret.
 - **Report that follows the filters.** The ten report cards always describe the full file. Rebuilding them from the applied filter, sort, and grouping would make the cards and the data window describe the same slice.
 - **Larger files.** The 100 MB cap and the in-memory table bound what one process can hold. Streaming parse, or a store that pages rows from disk, would raise that limit without holding the whole frame in RAM.
