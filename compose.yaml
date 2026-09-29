@@ -1,0 +1,27 @@
+networks:
+  analitics_platform_network:
+    name: analitics_platform_network
+
+services:
+  analytics-api:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    image: analytics-api
+    container_name: analytics-api
+    env_file: .env
+    ports:
+      - "${API_PORT:-8000}:${API_PORT:-8000}"
+    networks:
+      - analitics_platform_network
+
+  analytics-web:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    image: analytics-web
+    container_name: analytics-web
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    networks:
+      - analitics_platform_network
