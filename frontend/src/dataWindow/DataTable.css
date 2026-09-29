@@ -1,0 +1,25 @@
+.data-table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.data-table-header,
+.data-table-cell {
+  border: 1px solid #d4d4d8;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table-header {
+  background: #f4f4f5;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table-empty {
+  margin: 0;
+}

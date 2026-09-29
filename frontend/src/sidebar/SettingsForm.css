@@ -4,6 +4,11 @@
   gap: 16px;
 }
 
+.settings-error {
+  margin: 0 0 8px;
+  color: #b42318;
+}
+
 .settings-section,
 .settings-row {
   display: flex;

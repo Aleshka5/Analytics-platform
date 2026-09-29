@@ -1,0 +1,78 @@
+.zoom-surface {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  touch-action: none;
+}
+
+.zoom-surface-content {
+  transform-origin: top left;
+}
+
+.zoom-surface-controls {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+.zoom-surface-controls button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zoom-surface-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.zoom-surface-hint {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  pointer-events: none;
+  color: #18181b;
+}
+
+.zoom-surface-hint-left,
+.zoom-surface-hint-right {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.zoom-surface-hint-left {
+  animation: zoom-surface-hint-apart-left 1.6s ease-in-out infinite;
+}
+
+.zoom-surface-hint-right {
+  animation: zoom-surface-hint-apart-right 1.6s ease-in-out infinite;
+}
+
+@keyframes zoom-surface-hint-apart-left {
+  0%,
+  100% {
+    transform: translateX(6px);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes zoom-surface-hint-apart-right {
+  0%,
+  100% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}

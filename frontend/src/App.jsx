@@ -5,7 +5,10 @@ import "./App.css";
 import Header from "./components/Header";
 import SheetDialog from "./components/SheetDialog";
 import UploadZone from "./components/UploadZone";
-import { deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
+import { ApiError, deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
+import { fetchRows } from "./api/rows";
+import DataWindow from "./dataWindow/DataWindow";
+import { draftToQueryBody } from "./query/requestBody";
 import ReportBoard from "./report/ReportBoard";
 import { emptyDraft } from "./sidebar/draft";
 import SettingsForm from "./sidebar/SettingsForm";
@@ -63,12 +66,18 @@ export default function App() {
   const [datasetId, setDatasetId] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsDraft, setSettingsDraft] = useState(() => emptyDraft());
+  const [appliedDraft, setAppliedDraft] = useState(null);
+  const [dataWindow, setDataWindow] = useState(null);
+  const [windowOpen, setWindowOpen] = useState(false);
+  const [applyError, setApplyError] = useState(null);
   const [settingsColumns, setSettingsColumns] = useState([]);
   const [busy, setBusy] = useState(false);
   const [serverMessage, setServerMessage] = useState(null);
   const [sheetPrompt, setSheetPrompt] = useState(null);
   const busyRef = useRef(false);
   const sheetRef = useRef(null);
+  const datasetIdRef = useRef(null);
+  const rowsRequestRef = useRef(0);
   const locale = (i18n.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
   const api = {
     uploadDataset: (file) => uploadDataset(file, { lang: locale }),
@@ -77,19 +86,80 @@ export default function App() {
   };
 
   function setActiveDataset(nextId) {
-    if (nextId !== datasetId) {
+    if (nextId !== datasetIdRef.current) {
+      rowsRequestRef.current += 1;
       setSettingsDraft(emptyDraft());
       setSettingsColumns([]);
       setSettingsOpen(false);
+      setAppliedDraft(null);
+      setDataWindow(null);
+      setWindowOpen(false);
+      setApplyError(null);
     }
+    datasetIdRef.current = nextId;
     setDatasetId(nextId);
   }
 
-  function handleSettingsApply() {}
+  function rowsRequestIsCurrent(requestId, requestDatasetId) {
+    return requestId === rowsRequestRef.current && requestDatasetId === datasetIdRef.current;
+  }
+
+  async function handleSettingsApply() {
+    const requestId = rowsRequestRef.current + 1;
+    rowsRequestRef.current = requestId;
+    const requestDatasetId = datasetId;
+    const draft = settingsDraft;
+    const body = draftToQueryBody(draft, settingsColumns, 1);
+    try {
+      const result = await fetchRows(requestDatasetId, body, { lang: locale });
+      if (!rowsRequestIsCurrent(requestId, requestDatasetId)) {
+        return;
+      }
+      setAppliedDraft(JSON.parse(JSON.stringify(draft)));
+      setDataWindow({ body, page: result });
+      setWindowOpen(true);
+      setApplyError(null);
+      setSettingsOpen(false);
+    } catch (error) {
+      if (!rowsRequestIsCurrent(requestId, requestDatasetId)) {
+        return;
+      }
+      if (error instanceof ApiError && error.status === 422) {
+        setApplyError(error.message);
+        return;
+      }
+      setApplyError(error instanceof Error && error.message ? error.message : "Request failed");
+    }
+  }
+
+  async function loadPage(page) {
+    if (!datasetId || !dataWindow) {
+      return;
+    }
+    const requestId = rowsRequestRef.current + 1;
+    rowsRequestRef.current = requestId;
+    const requestDatasetId = datasetId;
+    const body = { ...dataWindow.body, page };
+    try {
+      const result = await fetchRows(requestDatasetId, body, { lang: locale });
+      if (!rowsRequestIsCurrent(requestId, requestDatasetId)) {
+        return;
+      }
+      setDataWindow({
+        body: { ...body, page: result.page },
+        page: result,
+      });
+    } catch {
+      // Keep the page that is already open.
+    }
+  }
 
   function closeSettings() {
     setSettingsOpen(false);
-    setSettingsDraft(emptyDraft());
+    setSettingsDraft(
+      appliedDraft ? JSON.parse(JSON.stringify(appliedDraft)) : emptyDraft(),
+    );
+    setApplyError(null);
   }
 
   function openSheet(prompt) {
@@ -227,8 +297,30 @@ export default function App() {
             draft={settingsDraft}
             onChange={setSettingsDraft}
             onApply={handleSettingsApply}
+            errorMessage={applyError}
           />
         </SettingsSidebar>
+      ) : null}
+      {datasetId && windowOpen && dataWindow ? (
+        <DataWindow
+          columns={dataWindow.page.columns}
+          rows={dataWindow.page.rows}
+          spans={dataWindow.page.spans}
+          mode={dataWindow.page.group?.mode || dataWindow.body.group?.mode || "rowspan"}
+          page={dataWindow.page.page}
+          totalPages={dataWindow.page.total_pages}
+          locale={locale}
+          labels={{
+            close: t("table.close"),
+            empty: t("table.empty"),
+            pageSize: t("table.pageSize"),
+            previous: t("table.previous"),
+            next: t("table.next"),
+          }}
+          onPrevious={() => loadPage(dataWindow.page.page - 1)}
+          onNext={() => loadPage(dataWindow.page.page + 1)}
+          onClose={() => setWindowOpen(false)}
+        />
       ) : null}
     </>
   );

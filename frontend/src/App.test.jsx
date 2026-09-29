@@ -7,12 +7,16 @@ import { setLanguage } from "./i18n";
 import { SECTION_ORDER } from "./report/sequence";
 import { MAX_UPLOAD_BYTES } from "./upload/validateFile";
 
-vi.mock("./api/datasets", () => ({
-  uploadDataset: vi.fn(),
-  selectSheet: vi.fn(),
-  deleteDataset: vi.fn(),
-  fetchSection: vi.fn(),
-}));
+vi.mock("./api/datasets", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    uploadDataset: vi.fn(),
+    selectSheet: vi.fn(),
+    deleteDataset: vi.fn(),
+    fetchSection: vi.fn(),
+  };
+});
 
 const COLUMNS = [
   { name: "Transaction_Date", dtype: "datetime64[ns]", role: "datetime", unique_count: 90 },
@@ -492,35 +496,194 @@ test("switching language refetches every section and shows the server insight", 
   expect(screen.getByTestId("upload-button")).toHaveTextContent("Заменить файл");
 });
 
-test("apply in data settings does not fetch and escape returns focus without changing the preview", async () => {
+function stubMatchMedia() {
+  window.matchMedia = (query) => ({
+    matches: false,
+    media: query,
+    addEventListener() {},
+    removeEventListener() {},
+  });
+}
+
+function jsonResponse(status, payload) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function mockRowsFetch(handler) {
+  const recorded = [];
+  const previous = globalThis.fetch;
+  const fetchMock = vi.fn(async (url, init = {}) => {
+    const body = JSON.parse(init.body);
+    const call = { url: String(url), method: init.method, body };
+    recorded.push(call);
+    return handler(call, recorded.length - 1);
+  });
+  globalThis.fetch = fetchMock;
+  return {
+    recorded,
+    restore() {
+      globalThis.fetch = previous;
+    },
+  };
+}
+
+function rowsPayload({ page, totalPages, region }) {
+  return {
+    page,
+    page_size: 100,
+    total_rows: 1,
+    total_pages: totalPages,
+    columns: ["Region"],
+    group: null,
+    rows: [{ Region: region }],
+    spans: [],
+  };
+}
+
+test("Apply success calls the rows route once and closes the sidebar", async () => {
   render(<App />);
   await uploadReady("trades.csv", "ds-1");
   await playReport({ insight: "Stable insight." });
+  stubMatchMedia();
 
-  const tab = screen.getByRole("button", { name: "Data settings" });
-  expect(tab).toBeInTheDocument();
-  expect(tab).toHaveAttribute("data-testid", "settings-tab");
-
-  const fetchSpy = vi.spyOn(globalThis, "fetch");
-  fireEvent.click(tab);
   const sectionCalls = fetchSection.mock.calls.length;
+  const previewText = screen.getByTestId("card-preview").textContent;
+  const rows = mockRowsFetch(() =>
+    jsonResponse(200, rowsPayload({ page: 1, totalPages: 1, region: "UAE" })),
+  );
 
-  fireEvent.click(screen.getByTestId("settings-add-condition"));
-  expect(screen.getByTestId("condition-column-0")).toBeInTheDocument();
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+    fireEvent.click(screen.getByTestId("settings-apply"));
 
-  fireEvent.click(screen.getByTestId("settings-apply"));
-  expect(fetchSpy).not.toHaveBeenCalled();
-  expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
-  expect(screen.getByTestId("condition-column-0")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
+    });
+
+    expect(rows.recorded).toHaveLength(1);
+    expect(rows.recorded[0].method).toBe("POST");
+    expect(rows.recorded[0].url).toBe("/api/v1/datasets/ds-1/rows?lang=en");
+    expect(rows.recorded[0].body.page).toBe(1);
+    expect(rows.recorded[0].body.filter).toBeNull();
+    expect(rows.recorded[0].body.sort).toBeNull();
+    expect(rows.recorded[0].body.group).toBeNull();
+    expect(screen.getByTestId("data-window")).toBeInTheDocument();
+    expect(screen.getByTestId("data-window")).toHaveTextContent("UAE");
+    expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
+    expect(screen.getByTestId("card-preview").textContent).toBe(previewText);
+  } finally {
+    rows.restore();
+  }
+});
+
+test("a 422 renders the message and does not render the dialog", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  await playReport({ insight: "Stable insight." });
+  stubMatchMedia();
 
   const previewText = screen.getByTestId("card-preview").textContent;
-  fireEvent.keyDown(document, { key: "Escape" });
-  expect(screen.getByTestId("settings-tab")).toHaveFocus();
-  expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
-  expect(screen.getByTestId("card-preview").textContent).toBe(previewText);
-  expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
+  const rows = mockRowsFetch(() =>
+    jsonResponse(422, {
+      error: { code: "invalid_filter", message: "Condition 0 is invalid." },
+    }),
+  );
 
-  fireEvent.click(screen.getByTestId("settings-tab"));
-  expect(screen.queryByTestId("condition-column-0")).not.toBeInTheDocument();
-  fetchSpy.mockRestore();
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+    fireEvent.click(screen.getByTestId("settings-apply"));
+
+    expect(await screen.findByTestId("settings-error")).toHaveTextContent("Condition 0 is invalid.");
+    expect(screen.getByTestId("settings-panel")).toBeInTheDocument();
+    expect(screen.queryByTestId("data-window")).not.toBeInTheDocument();
+    expect(screen.getByTestId("card-preview").textContent).toBe(previewText);
+  } finally {
+    rows.restore();
+  }
+});
+
+test("paging and close keep the report and the applied draft", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  await playReport({ insight: "Stable insight." });
+  stubMatchMedia();
+
+  const sectionCalls = fetchSection.mock.calls.length;
+  const previewText = screen.getByTestId("card-preview").textContent;
+  const rows = mockRowsFetch((call) =>
+    jsonResponse(
+      200,
+      rowsPayload({
+        page: call.body.page,
+        totalPages: 2,
+        region: call.body.page === 1 ? "UAE" : "UK",
+      }),
+    ),
+  );
+
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+    fireEvent.click(screen.getByTestId("settings-apply"));
+    expect(await screen.findByTestId("data-window")).toHaveTextContent("UAE");
+
+    fireEvent.click(screen.getByTestId("pagination-next"));
+    await waitFor(() => {
+      expect(screen.getByTestId("page-label")).toHaveTextContent("2 / 2");
+    });
+    expect(screen.getByTestId("data-window")).toHaveTextContent("UK");
+    expect(rows.recorded.at(-1).method).toBe("POST");
+    expect(rows.recorded.at(-1).body.page).toBe(2);
+    expect(fetchSection.mock.calls).toHaveLength(sectionCalls);
+
+    fireEvent.click(screen.getByTestId("data-window-close"));
+    expect(screen.queryByTestId("data-window")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("settings-tab"));
+    expect(screen.queryByTestId("condition-column-0")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("settings-add-condition"));
+    expect(screen.getByTestId("condition-column-0")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
+    expect(screen.getByTestId("card-preview").textContent).toBe(previewText);
+
+    fireEvent.click(screen.getByTestId("settings-tab"));
+    expect(screen.queryByTestId("condition-column-0")).not.toBeInTheDocument();
+  } finally {
+    rows.restore();
+  }
+});
+
+test("a later 422 does not replace an open window", async () => {
+  render(<App />);
+  await uploadReady("trades.csv", "ds-1");
+  await playReport({ insight: "Stable insight." });
+  stubMatchMedia();
+
+  let calls = 0;
+  const rows = mockRowsFetch(() => {
+    calls += 1;
+    if (calls === 1) {
+      return jsonResponse(200, rowsPayload({ page: 1, totalPages: 1, region: "UAE" }));
+    }
+    return jsonResponse(422, { error: { code: "invalid_filter", message: "Bad filter." } });
+  });
+
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Data settings" }));
+    fireEvent.click(screen.getByTestId("settings-apply"));
+    expect(await screen.findByTestId("data-window")).toHaveTextContent("UAE");
+
+    fireEvent.click(screen.getByTestId("settings-tab"));
+    expect(screen.getByTestId("data-window")).toHaveTextContent("UAE");
+    fireEvent.click(screen.getByTestId("settings-apply"));
+
+    expect(await screen.findByTestId("settings-error")).toHaveTextContent("Bad filter.");
+    expect(screen.getByTestId("data-window")).toHaveTextContent("UAE");
+  } finally {
+    rows.restore();
+  }
 });

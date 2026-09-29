@@ -74,5 +74,12 @@
     "ascending": "Ascending",
     "descending": "Descending",
     "groupColumns": "Group columns"
+  },
+  "table": {
+    "close": "Close",
+    "empty": "No rows match these settings",
+    "pageSize": "100 rows",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

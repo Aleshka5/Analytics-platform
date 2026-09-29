@@ -1,0 +1,43 @@
+.data-window {
+  position: fixed;
+  top: calc(var(--header-height) + 24px);
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 36px;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 640px) {
+  .data-window {
+    top: calc(var(--header-height) + 8px);
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+  }
+}
+
+.data-window > :not(.data-window-close):not(.pagination-bar) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.data-window-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #b42318;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}

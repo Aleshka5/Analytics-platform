@@ -130,7 +130,7 @@ function ConditionValue({ condition, index, columns, draft, onChange }) {
   );
 }
 
-export default function SettingsForm({ columns, draft, onChange, onApply }) {
+export default function SettingsForm({ columns, draft, onChange, onApply, errorMessage }) {
   const { t } = useTranslation();
 
   function toggleGroupColumn(name, checked) {
@@ -142,6 +142,11 @@ export default function SettingsForm({ columns, draft, onChange, onApply }) {
 
   return (
     <form className="settings-form" onSubmit={(event) => event.preventDefault()}>
+      {typeof errorMessage === "string" && errorMessage !== "" ? (
+        <p className="settings-error" data-testid="settings-error" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
       <div className="settings-section">
         <label className="settings-choice">
           <input
