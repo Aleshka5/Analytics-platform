@@ -99,3 +99,50 @@ test("apply button uses the Russian label", async () => {
   expect(screen.getByTestId("settings-apply")).toHaveTextContent("Применить");
   await act(() => setLanguage("en"));
 });
+
+test("operators read as words and keep the API codes as values", () => {
+  render(<Harness />);
+  fireEvent.click(screen.getByTestId("settings-add-condition"));
+  fireEvent.change(screen.getByTestId("condition-column-0"), {
+    target: { value: "Region" },
+  });
+  const option = screen.getByRole("option", { name: "is one of" });
+  expect(option).toHaveValue("in");
+});
+
+test("AND and OR cards appear from two conditions and drive the connector", () => {
+  render(<Harness />);
+  const add = screen.getByTestId("settings-add-condition");
+  fireEvent.click(add);
+  expect(screen.queryByRole("radio", { name: /Match any/ })).not.toBeInTheDocument();
+
+  fireEvent.click(add);
+  expect(screen.getByRole("radio", { name: /Match all/ })).toBeChecked();
+  expect(screen.getByText("AND")).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("radio", { name: /Match any/ }));
+  expect(screen.getByText("OR")).toBeInTheDocument();
+  expect(screen.queryByText("AND")).not.toBeInTheDocument();
+});
+
+test("the red down arrow sets the sort to descending", () => {
+  render(<Harness />);
+  fireEvent.click(screen.getByTestId("settings-add-sort"));
+  const ascending = screen.getByRole("button", { name: "Ascending" });
+  const descending = screen.getByRole("button", { name: "Descending" });
+  expect(ascending).toHaveAttribute("aria-pressed", "true");
+
+  fireEvent.click(descending);
+  expect(descending).toHaveAttribute("aria-pressed", "true");
+  expect(ascending).toHaveAttribute("aria-pressed", "false");
+});
+
+test("group mode cards appear after a group column is checked", () => {
+  render(<Harness />);
+  expect(screen.queryByRole("radio", { name: /Merged cells/ })).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByTestId("group-column-Region"));
+  expect(screen.getByRole("radio", { name: /Merged cells/ })).toBeChecked();
+  fireEvent.click(screen.getByRole("radio", { name: /Aggregated rows/ }));
+  expect(screen.getByRole("radio", { name: /Aggregated rows/ })).toBeChecked();
+});

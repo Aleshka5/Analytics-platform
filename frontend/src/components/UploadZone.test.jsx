@@ -88,3 +88,20 @@ test("dropping a small csv on the zone accepts it", () => {
   expect(onAccepted).toHaveBeenCalledTimes(1);
   expect(onAccepted).toHaveBeenCalledWith(file);
 });
+
+test("marks the zone while a file is dragged over it", () => {
+  const { onAccepted } = renderZone(false);
+  const zone = screen.getByTestId("upload-zone");
+  const file = new File(["x"], "notes.csv", { type: "text/csv" });
+
+  expect(zone).toHaveAttribute("data-dragging", "false");
+  fireEvent.dragEnter(zone);
+  expect(zone).toHaveAttribute("data-dragging", "true");
+  fireEvent.dragLeave(zone);
+  expect(zone).toHaveAttribute("data-dragging", "false");
+
+  fireEvent.dragEnter(zone);
+  fireEvent.drop(zone, { dataTransfer: { files: [file] } });
+  expect(zone).toHaveAttribute("data-dragging", "false");
+  expect(onAccepted).toHaveBeenCalledWith(file);
+});

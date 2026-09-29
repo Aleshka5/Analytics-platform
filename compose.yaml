@@ -21,6 +21,8 @@ services:
       dockerfile: Containerfile
     image: analytics-web
     container_name: analytics-web
+    environment:
+      WEB_ALLOWED_HOSTS: ${WEB_ALLOWED_HOSTS:-}
     ports:
       - "${WEB_PORT:-5173}:5173"
     networks:

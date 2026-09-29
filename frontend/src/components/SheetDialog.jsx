@@ -46,13 +46,13 @@ export default function SheetDialog({
       <div className="sheet-dialog-actions">
         <button
           type="button"
-          className="sheet-dialog-confirm"
+          className="btn btn-primary sheet-dialog-confirm"
           disabled={!selected}
           onClick={handleConfirm}
         >
           {confirmLabel}
         </button>
-        <button type="button" className="sheet-dialog-cancel" onClick={onCancel}>
+        <button type="button" className="btn sheet-dialog-cancel" onClick={onCancel}>
           {cancelLabel}
         </button>
       </div>

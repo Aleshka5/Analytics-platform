@@ -10,17 +10,26 @@ const apiProxy = {
   },
 };
 
+// Host names the page may be served under besides localhost, from WEB_ALLOWED_HOSTS
+// in .env (comma-separated). Vite blocks requests for any other Host header.
+const allowedHosts = (process.env.WEB_ALLOWED_HOSTS || "")
+  .split(",")
+  .map((host) => host.trim())
+  .filter((host) => host !== "");
+
 export default defineConfig({
   plugins: [react()],
   server: {
     host: "0.0.0.0",
     port: 5173,
     proxy: apiProxy,
+    allowedHosts,
   },
   preview: {
     host: "0.0.0.0",
     port: 5173,
     proxy: apiProxy,
+    allowedHosts,
   },
   test: {
     environment: "jsdom",

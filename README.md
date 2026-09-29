@@ -51,6 +51,12 @@ docker compose run --rm --no-deps analytics-web npm test
 
 `WEB_PORT` and `API_PORT` in `.env` change the host ports. The page container still listens on 5173 inside the network. Both containers join `analitics_platform_network` and reach each other as `analytics-api` and `analytics-web`.
 
+To serve the page under a domain name, list it in `WEB_ALLOWED_HOSTS` in `.env` (comma-separated, for example `WEB_ALLOWED_HOSTS=freedom.filenkov.store`). Vite refuses requests for any other host name with "Blocked request. This host is not allowed." Restart the page container after changing it.
+
+## Claude Code UI tooling
+
+`.mcp.json` adds the Playwright MCP server, so Claude can open the page at `http://localhost:5173`, click through it, and take screenshots while working on the UI. It needs Node.js (`npx`). If Playwright's own Chromium is not installed, set `PLAYWRIGHT_MCP_EXECUTABLE_PATH` to a Chromium binary (in Claude Code on the web: `/opt/pw-browsers/chromium`).
+
 ## About the project
 
 Open the page, drop a file, and the report fills in one card at a time. There is no login. A parsed table stays in the API process for 60 minutes (`DATASET_TTL_MINUTES`).

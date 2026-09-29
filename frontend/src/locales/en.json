@@ -4,7 +4,10 @@
     "action": "Upload file",
     "replace": "Replace file",
     "tooLarge": "The file is larger than 100 MB.",
-    "unsupported": "This file type is not supported."
+    "unsupported": "This file type is not supported.",
+    "title": "Drop a file to build the report",
+    "hint": "CSV, TSV, XLSX, XLS, JSON or Parquet · up to 100 MB",
+    "replaceHint": "or drop a new file here"
   },
   "cards": {
     "preview": "Preview",
@@ -48,7 +51,9 @@
     "topValue": "Top value",
     "frequency": "Frequency",
     "value": "Value",
-    "sum": "Sum"
+    "sum": "Sum",
+    "day": "Day",
+    "month": "Month"
   },
   "unavailable": {
     "no_insight_inputs": "There is no date column, no empty values, and no categorical column to describe."
@@ -73,7 +78,27 @@
     "value": "Value",
     "ascending": "Ascending",
     "descending": "Descending",
-    "groupColumns": "Group columns"
+    "groupColumns": "Group columns",
+    "filterTitle": "Filter rows",
+    "filterHint": "Keep only the rows you need.",
+    "noConditions": "No conditions yet, so every row is shown.",
+    "matchAllHint": "A row must pass every condition.",
+    "matchAnyHint": "A row must pass at least one condition.",
+    "and": "AND",
+    "or": "OR",
+    "sortTitle": "Sort rows",
+    "sortHint": "Choose which rows come first.",
+    "noSorts": "Rows keep the order from the file.",
+    "then": "then",
+    "direction": "Direction",
+    "groupTitle": "Group rows",
+    "groupHint": "Put rows with the same value together.",
+    "mergedHint": "Every row stays. Equal values share one cell.",
+    "aggregatedHint": "One row per group, with totals.",
+    "from": "from",
+    "to": "to",
+    "inHint": "e.g. UAE, UK",
+    "datePlaceholder": "YYYY-MM-DD"
   },
   "table": {
     "close": "Close",
@@ -85,5 +110,17 @@
     "csv": "CSV",
     "json": "JSON",
     "pdf": "PDF"
+  },
+  "operators": {
+    "eq": "is equal to",
+    "gt": "is greater than",
+    "gte": "is at least",
+    "lt": "is less than",
+    "lte": "is at most",
+    "between": "is between",
+    "contains": "contains",
+    "in": "is one of",
+    "empty": "is empty",
+    "not_empty": "is not empty"
   }
 }

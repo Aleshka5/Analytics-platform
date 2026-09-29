@@ -29,13 +29,17 @@ Top to bottom:
 3. Report cards, in the [call order](api-contract.md#conventions), stacked with a gap between them.
 4. Nothing else in the document flow. The settings tab, the data window, and the report export button are attached to the viewport.
 
-The page background is neutral. Cards are white with a light border. Unavailable cards use a red border and red message text (`#b42318` on a `#fef3f2` fill).
+Colors, type, and motion follow the [visual style](#visual-style). Unavailable cards use a red border and red message text (`#b42318` on a `#fef3f2` fill).
+
+On screens at least 960 px wide the cards sit in a two-column grid. Preview, Summary, Dynamics, and Insights span both columns. The other cards pair up in call order. Narrower screens use one column.
 
 <a id="upload-zone"></a>
 
 ## Upload zone
 
-Before a file is accepted, the zone fills the viewport under the header. A dashed area covers that space. Centered in the viewport is a button labeled **Upload file** / **Загрузить файл**.
+Before a file is accepted, the zone fills the viewport under the header. A dashed area covers that space. Centered in the viewport are an upload icon, the headline **Drop a file to build the report** / **Перетащите файл, чтобы построить отчёт**, the format hint, and a button labeled **Upload file** / **Загрузить файл**.
+
+While a file is dragged over the zone, the dashed border turns brand green and the area gets a green wash. The mark clears when the file leaves or drops.
 
 The same action accepts a file in two ways:
 
@@ -44,17 +48,17 @@ The same action accepts a file in two ways:
 
 The browser refuses a file larger than 100 MB before the request, with the localized `file_too_large` sentence under the button. The server repeats that check. An extension outside the allowed list shows the localized `unsupported_format` sentence under the button, and the zone stays as it was.
 
-While the upload request is in flight, the button is disabled and shows a progress label.
+While the upload request is in flight, the button is disabled and shows a spinner.
 
 ### After a ready dataset
 
-The zone collapses upward into a single bar. The button label becomes **Replace file** / **Заменить файл**. The collapsed bar still accepts a drop.
+The zone collapses upward into a single bar. The button label becomes **Replace file** / **Заменить файл**, with the hint **or drop a new file here** / **или перетащите новый файл сюда** beside it. The collapsed bar still accepts a drop.
 
 Replace uploads the new file first. Only a `ready` response, or a finished sheet selection that becomes `ready`, swaps the page: the previous dataset is deleted, report cards clear, the sidebar draft resets, and an open data window closes. A failed upload leaves the current dataset on screen and shows the error under the button.
 
 ### Several worksheets
 
-When the upload returns `sheet_required`, a dialog lists `sheets`. The zone stays expanded and the report does not start. The actions are **Confirm** / **Подтвердить** and **Cancel** / **Отмена**. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
+When the upload returns `sheet_required`, a dialog centered over a dimmed page lists `sheets`. The zone stays expanded and the report does not start. The actions are **Confirm** / **Подтвердить** and **Cancel** / **Отмена**. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
 
 <a id="report-sequence"></a>
 
@@ -82,15 +86,15 @@ On the sample file the selectors start at `Quantity`, `Region`, and `Transaction
 ### Card contents
 
 - **Preview.** A table of up to 20 rows. Column names are the field names.
-- **Columns.** Name, role, distinct count.
-- **Size.** Row count and column count.
+- **Columns.** Name, role, distinct count. Roles here and in Data types are small badges.
+- **Size.** Two stat tiles: row count and column count.
 - **Data types.** Name, pandas dtype, role.
-- **Missing values.** Name, missing count, missing percent, filled count.
-- **Summary.** One block for numeric stats, one block for the other columns (count, unique, top, frequency).
-- **Top and worst.** Two lists of five rows, labeled so that a higher metric is the top side.
-- **Grouping.** A compact table: category value, count, sum, mean. When `truncated` is true, a line under the table says the list stops at 100 groups.
-- **Dynamics.** A line chart of `sum` by `bucket`. Grain is the `grain` field (`day` or `month`). The sample file is a daily line.
-- **Insights.** Up to five sentences from `items[].text`.
+- **Missing values.** Name, missing count, missing percent with a short meter, filled count.
+- **Summary.** One block for numeric stats, one block for the other columns (count, unique, top, frequency). Each column is a tile with its stats in a label and value grid.
+- **Top and worst.** Two lists of five rows, labeled so that a higher metric is the top side. Each row shows the rank, the metric value, the values of the first two text or category columns, and a bar scaled to the largest value in both lists.
+- **Grouping.** A compact table: category value, count, sum, mean. The sum cell carries a bar scaled to the largest sum. When `truncated` is true, a line under the table says the list stops at 100 groups.
+- **Dynamics.** A line chart of `sum` by `bucket`. Grain is the `grain` field (`day` or `month`), shown as a chip: **Day** / **День** or **Month** / **Месяц**. The sample file is a daily line. The chart has rounded y-axis ticks, the first, middle, and last date under the x-axis (first and last only below 480 px of chart width), a 10% area wash, and a marker with the value on the last point. Pointer hover shows a crosshair and a readout (date and sum) for the nearest bucket. The chart takes keyboard focus: it then shows the last bucket, and the left and right arrow keys move the readout.
+- **Insights.** Up to five sentences from `items[].text`, each with a small icon, fading in one after another.
 
 Numbers in cards use the locale and at most two fraction digits. Dates use the locale's short date. Empty cells render as an em dash.
 
@@ -115,6 +119,21 @@ Then it plays four states:
 
 The format dialog offers **Excel** and **PDF**. The chosen format calls `GET .../report` with the active `lang`. The browser saves the attachment.
 
+<a id="pdf-report"></a>
+
+### PDF report
+
+The PDF uses the [visual style](#visual-style) palette on A4, with DejaVu Sans regular and bold bundled for Cyrillic.
+
+- The first page opens with a dark ink band: the logo mark, the report title, and `filename · export date`, over a thin bright-green rule.
+- Each section heading carries the same `01`–`10` chip as the web cards.
+- Tables have a light header row with uppercase labels, hairline row rules, and zebra rows. API keys become labels (`missing_pct` becomes `Missing %`, `p25` becomes `25%`); column names stay as they are. Numeric columns align right. Numbers are rounded to two decimals and grouped for `lang` (`5,655.33` / `5 655,33`). Column widths follow the widest text, and no column takes more than 40% of the width.
+- **Size** is two stat tiles.
+- **Dynamics** draws the line chart (rounded ticks, 10% area wash, last value) above its table. A table with one or two columns and more than 12 rows flows into three side-by-side columns in bands of 12 rows, so it can break across pages.
+- **Insights** sentences are green notes. The kind and period stay as a table.
+- An unavailable section is a red callout with the message.
+- Every page has a footer: `title · filename · date` on the left and the page number in green on the right.
+
 Closing the dialog without a choice does not start the cooldown.
 
 <a id="sidebar"></a>
@@ -123,16 +142,20 @@ Closing the dialog without a choice does not start the cooldown.
 
 Collapsed, it is a semicircle on the right edge, vertically centered. Inside it is an icon of three horizontal lines with a knob on each line, each knob at a different position. The control's accessible name is **Data settings** / **Настройки данных**.
 
-Activating it opens a panel over the page, from the right edge, full height, width `min(420px, 100vw)`, with a dimmed scrim over the rest. The scrim click and the Escape key close the panel and discard the unapplied draft.
+Activating it opens a panel over the page, from the right edge, full height, width `min(420px, 100vw)`, with a dimmed scrim over the rest. The panel header shows **Data settings** / **Настройки данных** and a close cross. The cross, a scrim click, and the Escape key close the panel and discard the unapplied draft.
 
-The panel is one scrollable form:
+The panel is one scrollable form in three steps. Each step has an icon, a title, and one plain sentence, so a first-time user can follow it without help.
 
-1. Combinator toggle: **Match all** / **Все условия** (`and`) and **Match any** / **Любое условие** (`or`).
-2. Filter rows. Each row is a column, an operator, and a value. **Add condition** / **Добавить условие** appends a row. Each row can be removed. Operators offered for a column are only the ones legal for its role in the [operator table](api-contract.md#query-rows).
-3. Sort rows, up to three. Each row is a column and ascending or descending. **Add sort** / **Добавить сортировку** stops at three.
-4. Group columns, one or more, chosen from non-metric columns.
-5. Group mode toggle: **Merged cells** / **Объединённые ячейки** (`rowspan`) and **Aggregated rows** / **Агрегированные строки** (`aggregate`).
-6. **Apply** / **Применить** at the end of the list.
+1. **Filter rows** / **Отбор строк**, "Keep only the rows you need."
+   - With no conditions, a dashed note says every row is shown.
+   - Each condition is a card that reads like a sentence: column, then the operator in words, then the value. Operator words replace the API codes (for example `in` is **is one of** / **одно из**, `gt` is **is greater than** / **больше**). The value placeholder helps: **e.g. UAE, UK** for `is one of`, **from** and **to** for `is between`, **YYYY-MM-DD** for a date column. Operators offered for a column are only the ones legal for its role in the [operator table](api-contract.md#query-rows).
+   - Between two cards a connector pill shows how they combine: **AND** / **И** in green or **OR** / **ИЛИ** in violet.
+   - With two or more conditions, two picture cards above the list choose the combinator. **Match all** / **Все условия** (`and`) shows two circles with only the overlap filled: "A row must pass every condition." **Match any** / **Любое условие** (`or`) shows both circles filled: "A row must pass at least one condition." With fewer than two conditions the choice is hidden, and the stored combinator is kept.
+   - **Add condition** / **Добавить условие** appends a card. A trash button on each card removes it.
+2. **Sort rows** / **Сортировка**, "Choose which rows come first." Up to three numbered cards, joined by **then** / **затем**. Each card is a column and a direction toggle: a green up arrow for ascending and a red down arrow for descending. The arrows carry the accessible names **Ascending** / **Descending**. **Add sort** / **Добавить сортировку** stops at three.
+3. **Group rows** / **Группировка**, "Put rows with the same value together." Non-metric columns are toggle chips. After at least one chip is on, two picture cards choose the mode. **Merged cells** / **Объединённые ячейки** (`rowspan`) shows a mini table whose key cells span two rows: "Every row stays. Equal values share one cell." **Aggregated rows** / **Агрегированные строки** (`aggregate`) shows a shorter mini table with a Σ column: "One row per group, with totals."
+
+**Apply** / **Применить** sits in a footer that stays at the bottom of the panel while the form scrolls.
 
 Apply sends `POST .../rows` with `page: 1`. Success closes the sidebar and opens the data window. **422** keeps the sidebar open and shows `error.message` at the top of the form. The data window stays as it was.
 
@@ -177,6 +200,42 @@ On a coarse pointer, the bottom-left of the dialog shows a looping hint while th
 
 A button at the bottom-right of the dialog, **Export** / **Экспорт**, opens a format dialog: **Excel**, **CSV**, **JSON**. Confirming it posts the applied body to `POST .../rows/export` and downloads every matching row, not only the visible page.
 
+<a id="visual-style"></a>
+
+## Visual style
+
+The palette comes from Freedom Broker. All colors are CSS custom properties on `:root` in `App.css`; components use the tokens, not raw values.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--brand` | `#009753` | Chart line, meters, icons, focus ring |
+| `--brand-bright` | `#1AE276` | Primary button fill with `--ink` text, glows |
+| `--brand-ink` | `#007A43` | Brand-colored text on white |
+| `--accent` | `#7D8DEE` | Second accent: category badges, hero glow |
+| `--ink` | `#0E1512` | Body text |
+| `--ink-muted` | `#5B6660` | Labels and secondary text |
+| `--canvas` | `#F4F7F5` | Page background |
+| `--surface` | `#FFFFFF` | Cards, panels, dialogs |
+| `--line` | `#E2E8E4` | Card borders, table rules, gridlines |
+
+The type face is Inter, bundled with the page through `@fontsource-variable/inter` so it loads without a font CDN. The system sans is the fallback. Table numbers use tabular figures and align right. Stat-tile values use proportional figures.
+
+The primary action (upload, apply, confirm, report and table export) is the bright green button with dark ink. Format choices in the export dialog are large tiles that fill with the bright green on hover. Secondary actions are white with a hairline border. Every control shows a 2 px `--brand` focus ring on keyboard focus.
+
+### Motion
+
+Motion is CSS only. Durations are 150 ms for hover and press, 250 ms for panels and dialogs, and 450 ms for card entry. Entering elements ease out.
+
+- A card rises 12 px and fades in when it appears. Its content fades in when the response replaces the skeleton.
+- Skeletons shimmer from left to right.
+- The sidebar slides in from the right edge, and its scrim fades in.
+- Dialogs and the data window fade in and scale up from 96%.
+- The dynamics line draws from left to right once per response.
+- The export pill and circle change width smoothly.
+- The language thumb slides between `RU` and `EN`.
+
+Under `prefers-reduced-motion: reduce` every animation and transition is turned off. The export cooldown arc still changes, because it tells the user when the button works again, but it steps instead of draining smoothly.
+
 <a id="strings"></a>
 
 ## Chrome strings
@@ -188,6 +247,11 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `upload.replace` | Replace file | Заменить файл |
 | `upload.tooLarge` | The file is larger than 100 MB. | Файл больше 100 МБ. |
 | `upload.unsupported` | This file type is not supported. | Этот тип файла не поддерживается. |
+| `upload.title` | Drop a file to build the report | Перетащите файл, чтобы построить отчёт |
+| `upload.hint` | CSV, TSV, XLSX, XLS, JSON or Parquet · up to 100 MB | CSV, TSV, XLSX, XLS, JSON или Parquet · до 100 МБ |
+| `upload.replaceHint` | or drop a new file here | или перетащите новый файл сюда |
+| `card.day` | Day | День |
+| `card.month` | Month | Месяц |
 | `settings.open` | Data settings | Настройки данных |
 | `settings.apply` | Apply | Применить |
 | `settings.matchAll` | Match all | Все условия |
@@ -196,6 +260,14 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `settings.addSort` | Add sort | Добавить сортировку |
 | `settings.merged` | Merged cells | Объединённые ячейки |
 | `settings.aggregated` | Aggregated rows | Агрегированные строки |
+| `settings.filterTitle` | Filter rows | Отбор строк |
+| `settings.sortTitle` | Sort rows | Сортировка |
+| `settings.groupTitle` | Group rows | Группировка |
+| `settings.and` / `settings.or` | AND / OR | И / ИЛИ |
+| `settings.then` | then | затем |
+| `operators.*` | is equal to, is greater than, is at least, is less than, is at most, is between, contains, is one of, is empty, is not empty | равно, больше, не меньше, меньше, не больше, между, содержит, одно из, пустое, не пустое |
+
+The step hints, empty notes, card descriptions, and placeholders are in the `settings` block of both locale files.
 | `table.close` | Close | Закрыть |
 | `table.empty` | No rows match these settings | Нет строк по этим настройкам |
 | `export.action` | Export | Экспорт |

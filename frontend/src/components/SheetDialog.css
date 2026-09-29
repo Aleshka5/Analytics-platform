@@ -1,12 +1,25 @@
+/* The dialog floats over the page; the spread shadow is its scrim. */
 .sheet-dialog {
-  position: relative;
+  position: fixed;
+  top: 50%;
+  left: 50%;
   z-index: 5;
-  background: #fff;
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  padding: 16px;
-  max-width: 420px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 100vmax var(--scrim),
+    var(--shadow-lg);
+  transform: translate(-50%, -50%);
+  animation: sheet-dialog-in var(--duration-panel) var(--ease-out);
+}
+
+@keyframes sheet-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
 }
 
 .sheet-dialog-title {
@@ -18,42 +31,36 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 12px 0;
+  max-height: 50vh;
+  margin: 16px 0 20px;
+  overflow-y: auto;
 }
 
 .sheet-dialog-option {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.sheet-dialog-option:hover {
+  border-color: var(--line-strong);
+}
+
+.sheet-dialog-option:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-wash);
 }
 
 .sheet-dialog-actions {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
   gap: 8px;
-}
-
-.sheet-dialog-confirm,
-.sheet-dialog-cancel {
-  border-radius: 8px;
-  padding: 8px 16px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.sheet-dialog-confirm {
-  background: #18181b;
-  color: #fff;
-  border: 1px solid #18181b;
-}
-
-.sheet-dialog-confirm:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.sheet-dialog-cancel {
-  background: #fff;
-  color: #18181b;
-  border: 1px solid #e4e4e7;
 }

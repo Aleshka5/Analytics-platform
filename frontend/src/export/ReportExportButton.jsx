@@ -153,7 +153,9 @@ export default function ReportExportButton({
       >
         {cooling ? <CooldownArc /> : null}
         <PageIcon />
-        {expanded ? <span>{labels.action}</span> : null}
+        <span className="report-export-label" aria-hidden="true">
+          {labels.action}
+        </span>
       </button>
       {dialogOpen ? (
         <FormatDialog

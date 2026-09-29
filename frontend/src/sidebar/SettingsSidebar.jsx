@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./SettingsSidebar.css";
+import { CloseIcon } from "./icons.jsx";
 
 export default function SettingsSidebar({ open, onOpen, onClose, children }) {
   const { t } = useTranslation();
@@ -77,6 +78,18 @@ export default function SettingsSidebar({ open, onOpen, onClose, children }) {
             aria-label={label}
             onClick={(event) => event.stopPropagation()}
           >
+            <div className="settings-header">
+              <h2>{label}</h2>
+              <button
+                type="button"
+                className="settings-close"
+                aria-label={t("table.close")}
+                title={t("table.close")}
+                onClick={onClose}
+              >
+                <CloseIcon />
+              </button>
+            </div>
             <div className="settings-scroll" data-testid="settings-scroll">
               {children}
             </div>

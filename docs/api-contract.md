@@ -704,7 +704,7 @@ Excel sheets, in call order: `Preview`, `Columns`, `Shape`, `Types`, `Missing`, 
 
 A section with status `unavailable` still gets its sheet (or its PDF block). The block contains `error.message` and no invented numbers.
 
-PDF sections follow the same order: a heading, then a simple table or the unavailable message.
+PDF sections follow the same order: a numbered heading, then the section's tables or the unavailable message. The first page opens with the report title (**Analytics report** / **Аналитический отчёт**), the file name, and the export date. Table cells carry the same values as the Excel sheets. Numbers are rounded to two decimals and grouped for `lang`. The layout is in the [design doc](design.md#pdf-report).
 
 **200** with `Content-Disposition: attachment`.
 

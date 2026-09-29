@@ -49,7 +49,7 @@ export default function TableExport({
     <>
       <button
         type="button"
-        className="table-export"
+        className="btn btn-primary table-export"
         data-testid="table-export"
         disabled={busy}
         onClick={openDialog}

@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "@fontsource-variable/inter";
 import "./i18n";
 import "./App.css";
 import Header from "./components/Header";
@@ -62,6 +63,8 @@ const CARD_LABEL_KEYS = [
   "frequency",
   "value",
   "sum",
+  "day",
+  "month",
 ];
 
 export default function App() {
@@ -340,6 +343,9 @@ export default function App() {
         serverMessage={serverMessage}
         actionLabel={t("upload.action")}
         replaceLabel={t("upload.replace")}
+        title={t("upload.title")}
+        hint={t("upload.hint")}
+        replaceHint={t("upload.replaceHint")}
         messages={{
           file_too_large: t("upload.tooLarge"),
           unsupported_format: t("upload.unsupported"),

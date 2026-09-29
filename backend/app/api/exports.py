@@ -1,5 +1,6 @@
 """Report file and table file downloads."""
 
+from datetime import date
 from pathlib import Path
 
 from fastapi import APIRouter, Query, Request
@@ -14,7 +15,7 @@ from app.domain.report_pdf import report_pdf
 from app.domain.report_xlsx import report_xlsx
 from app.domain.table_files import write_table
 from app.services.datasets import DatasetFailure, load_ready
-from app.services.report_blocks import build_report
+from app.services.report_blocks import build_report, report_title
 
 router = APIRouter(prefix="/api/v1")
 
@@ -78,7 +79,12 @@ def get_report(
         return _failure(exc, resolved)
     blocks = build_report(dataset, resolved)
     if export_format == "pdf":
-        payload = report_pdf(blocks)
+        payload = report_pdf(
+            blocks,
+            title=report_title(resolved),
+            subtitle=f"{dataset.filename} · {date.today().isoformat()}",
+            lang=resolved,
+        )
     else:
         payload = report_xlsx(blocks)
     return _download(payload, dataset.filename, export_format)

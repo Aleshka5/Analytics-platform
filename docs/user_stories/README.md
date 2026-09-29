@@ -19,6 +19,9 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | 7 | [US-07 Apply and data window](us-07-data-window.md) | Apply, table, scrolling, and zoom |
 | 8 | [US-08 Export backend](us-08-export-backend.md) | Report file and table file |
 | 9 | [US-09 Export controls](us-09-export-ui.md) | Both export buttons, format choice, cooldown |
+| 10 | [US-10 Visual polish](us-10-visual-polish.md) | Brand style, layout, chart, and motion |
+| 11 | [US-11 Settings anyone can read](us-11-friendly-settings.md) | Step-by-step settings panel with pictures for AND/OR, sort direction, and group mode |
+| 12 | [US-12 Branded PDF report](us-12-branded-pdf.md) | PDF report in the brand style: title band, numbered sections, chart, formatted numbers |
 
 ## Use-case coverage
 
@@ -29,8 +32,8 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | [UC-3](../use-cases.md#uc-3) Base report | US-02, US-03, US-04 |
 | [UC-4](../use-cases.md#uc-4) Block cannot be calculated | US-02, US-03, US-04 |
 | [UC-5](../use-cases.md#uc-5) Language | US-02 starts it; US-04 refetches; US-05, US-07, and US-09 add their strings |
-| [UC-6](../use-cases.md#uc-6) Settings | US-05, US-06, US-07 |
+| [UC-6](../use-cases.md#uc-6) Settings | US-05, US-06, US-07, US-11 |
 | [UC-7](../use-cases.md#uc-7) Data window | US-06, US-07 |
 | [UC-8](../use-cases.md#uc-8) Export table | US-08, US-09 |
-| [UC-9](../use-cases.md#uc-9) Export report | US-08, US-09 |
+| [UC-9](../use-cases.md#uc-9) Export report | US-08, US-09, US-12 |
 | [UC-10](../use-cases.md#uc-10) Replace file | US-02, US-03, US-04 |

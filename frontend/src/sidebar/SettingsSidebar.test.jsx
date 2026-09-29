@@ -49,6 +49,14 @@ test("closes the panel from the scrim", () => {
   expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
 });
 
+test("closes the panel from the header cross", () => {
+  render(<Harness />);
+
+  fireEvent.click(screen.getByTestId("settings-tab"));
+  fireEvent.click(screen.getByRole("button", { name: "Close" }));
+  expect(screen.queryByTestId("settings-panel")).not.toBeInTheDocument();
+});
+
 test("keeps the panel open when the click is inside it", () => {
   render(
     <Harness>

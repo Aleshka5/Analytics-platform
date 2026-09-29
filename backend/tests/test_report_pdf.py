@@ -59,3 +59,58 @@ def test_unavailable_message_does_not_raise() -> None:
     text = _text(report_pdf(blocks))
 
     assert message in text
+
+
+def test_first_page_has_the_title_band_and_a_page_number() -> None:
+    blocks = [
+        ReportBlock(
+            sheet="Shape",
+            title="Size",
+            message=None,
+            tables=(ReportTable(headers=("row_count", "column_count"), rows=(("1200", "7"),)),),
+        )
+    ]
+
+    pdf = report_pdf(blocks, title="Analytics report", subtitle="trades.xlsx · 2025-01-01")
+    first = PdfReader(BytesIO(pdf)).pages[0].extract_text()
+
+    assert "Analytics report" in first
+    assert "trades.xlsx · 2025-01-01" in first
+    assert "01" in first
+    assert "Row count" in first
+    assert "1,200" in first
+
+
+def test_russian_numbers_are_rounded_and_grouped() -> None:
+    blocks = [
+        ReportBlock(
+            sheet="Grouping",
+            title="Группировка",
+            message=None,
+            tables=(ReportTable(headers=("value", "sum"), rows=(("UAE", "1234567.891"),)),),
+        )
+    ]
+
+    text = _text(report_pdf(blocks, lang="ru")).replace(" ", " ")
+
+    assert "1 234 567,89" in text
+    assert "1234567.891" not in text
+
+
+def test_long_timeseries_keeps_every_bucket_next_to_its_chart() -> None:
+    rows = tuple((f"2025-01-{day:02d}", str(day * 10.5)) for day in range(1, 32))
+    rows += tuple((f"2025-02-{day:02d}", "") for day in range(1, 20))
+    blocks = [
+        ReportBlock(
+            sheet="Timeseries",
+            title="Dynamics",
+            message=None,
+            tables=(ReportTable(headers=("bucket", "sum"), rows=rows),),
+        )
+    ]
+
+    text = _text(report_pdf(blocks))
+
+    for bucket, _ in rows:
+        assert bucket in text
+    assert "325.5" in text
