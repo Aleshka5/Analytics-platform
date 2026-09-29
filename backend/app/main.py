@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.datasets import router as datasets_router
+from app.api.exports import router as exports_router
 from app.api.health import router as health_router
 from app.api.language import LanguageRejected, resolve_lang
 from app.api.rows import router as rows_router
@@ -11,6 +12,7 @@ app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.include_router(health_router)
 app.include_router(datasets_router)
 app.include_router(rows_router)
+app.include_router(exports_router)
 
 
 @app.exception_handler(Exception)

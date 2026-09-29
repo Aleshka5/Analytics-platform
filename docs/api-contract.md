@@ -764,6 +764,7 @@ These codes appear in the [error body](#conventions).
 | `sheet_not_found` | The worksheet was not found. |
 | `already_ready` | A sheet is already selected. Upload another file to change the source. |
 | `invalid_column` | The column is unknown or cannot be used here. |
+| `unsupported_export_format` | This export format is not supported. |
 
 | `code` | Russian message |
 | --- | --- |
@@ -782,3 +783,4 @@ These codes appear in the [error body](#conventions).
 | `sheet_not_found` | Лист не найден. |
 | `already_ready` | Лист уже выбран. Загрузите другой файл, чтобы сменить источник. |
 | `invalid_column` | Колонка неизвестна или не подходит для этого запроса. |
+| `unsupported_export_format` | Этот формат экспорта не поддерживается. |

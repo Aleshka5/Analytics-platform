@@ -85,6 +85,10 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "en": "The column is unknown or cannot be used here.",
         "ru": "Колонка неизвестна или не подходит для этого запроса.",
     },
+    "unsupported_export_format": {
+        "en": "This export format is not supported.",
+        "ru": "Этот формат экспорта не поддерживается.",
+    },
 }
 
 
