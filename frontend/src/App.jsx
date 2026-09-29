@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./i18n";
 import "./App.css";
 import Header from "./components/Header";
+import SheetDialog from "./components/SheetDialog";
 import UploadZone from "./components/UploadZone";
+import { deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
 import ReportBoard from "./report/ReportBoard";
+import { cancelSheet, confirmSheet, uploadFile } from "./upload/session";
 
 const CARD_TITLE_KEYS = [
   "preview",
@@ -54,19 +57,110 @@ const CARD_LABEL_KEYS = [
 
 export default function App() {
   const { t, i18n } = useTranslation();
-  const [collapsed, setCollapsed] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
+  const [datasetId, setDatasetId] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [serverMessage, setServerMessage] = useState(null);
+  const [sheetPrompt, setSheetPrompt] = useState(null);
+  const busyRef = useRef(false);
+  const sheetRef = useRef(null);
   const locale = (i18n.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
+  const api = {
+    uploadDataset: (file) => uploadDataset(file, { lang: locale }),
+    selectSheet: (id, sheet) => selectSheet(id, sheet, { lang: locale }),
+    deleteDataset: (id) => deleteDataset(id, { lang: locale }),
+  };
 
-  function handleAccepted() {
-    setCollapsed(true);
-    setResetKey((key) => key + 1);
+  function openSheet(prompt) {
+    sheetRef.current = prompt;
+    setSheetPrompt(prompt);
+  }
+
+  function closeSheet() {
+    sheetRef.current = null;
+    setSheetPrompt(null);
+  }
+
+  async function handleAccepted(file) {
+    if (busyRef.current || sheetRef.current) {
+      return;
+    }
+
+    busyRef.current = true;
+    setBusy(true);
+    setServerMessage(null);
+    const result = await uploadFile({ file, previousId: datasetId, api });
+    busyRef.current = false;
+    setBusy(false);
+
+    if (!result.ok) {
+      setServerMessage(result.message);
+      return;
+    }
+    if (result.status === "sheet_required") {
+      openSheet({
+        datasetId: result.datasetId,
+        sheets: result.sheets,
+        previousId: result.previousId,
+      });
+      return;
+    }
+    if (result.status === "ready") {
+      setDatasetId(result.datasetId);
+    }
+  }
+
+  async function handleConfirm(sheet) {
+    const prompt = sheetRef.current;
+    if (!prompt || busyRef.current) {
+      return;
+    }
+
+    busyRef.current = true;
+    setBusy(true);
+    setServerMessage(null);
+    const result = await confirmSheet({
+      datasetId: prompt.datasetId,
+      sheet,
+      previousId: prompt.previousId,
+      api,
+    });
+    busyRef.current = false;
+    setBusy(false);
+
+    if (!result.ok) {
+      setServerMessage(result.message);
+      return;
+    }
+
+    closeSheet();
+    setDatasetId(result.datasetId);
+  }
+
+  async function handleCancel() {
+    const prompt = sheetRef.current;
+    if (!prompt || busyRef.current) {
+      return;
+    }
+
+    busyRef.current = true;
+    setBusy(true);
+    const result = await cancelSheet({
+      datasetId: prompt.datasetId,
+      previousId: prompt.previousId,
+      api,
+    });
+    busyRef.current = false;
+    setBusy(false);
+    closeSheet();
+    setDatasetId(result.datasetId);
+    if (!result.ok && result.message) {
+      setServerMessage(result.message);
+    }
   }
 
   const titles = Object.fromEntries(CARD_TITLE_KEYS.map((key) => [key, t(`cards.${key}`)]));
   const labels = {
     ...Object.fromEntries(CARD_LABEL_KEYS.map((key) => [key, t(`card.${key}`)])),
-    unavailable: t("unavailable.no_insight_inputs"),
     empty: "\u2014",
   };
 
@@ -74,7 +168,9 @@ export default function App() {
     <>
       <Header />
       <UploadZone
-        collapsed={collapsed}
+        collapsed={datasetId !== null}
+        busy={busy}
+        serverMessage={serverMessage}
         actionLabel={t("upload.action")}
         replaceLabel={t("upload.replace")}
         messages={{
@@ -83,8 +179,18 @@ export default function App() {
         }}
         onAccepted={handleAccepted}
       />
-      {collapsed ? (
-        <ReportBoard locale={locale} titles={titles} labels={labels} resetKey={resetKey} />
+      {sheetPrompt ? (
+        <SheetDialog
+          sheets={sheetPrompt.sheets}
+          title={t("sheet.title")}
+          confirmLabel={t("sheet.confirm")}
+          cancelLabel={t("sheet.cancel")}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      ) : null}
+      {datasetId ? (
+        <ReportBoard datasetId={datasetId} lang={locale} titles={titles} labels={labels} />
       ) : null}
     </>
   );

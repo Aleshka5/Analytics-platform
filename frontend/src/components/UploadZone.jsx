@@ -8,11 +8,17 @@ export default function UploadZone({
   replaceLabel,
   messages,
   onAccepted,
+  busy = false,
+  serverMessage = null,
 }) {
   const inputRef = useRef(null);
   const [errorCode, setErrorCode] = useState(null);
 
   function handleFiles(fileList) {
+    if (busy) {
+      return;
+    }
+
     const file = fileList && fileList.length > 0 ? fileList[0] : null;
     if (!file) {
       return;
@@ -47,6 +53,8 @@ export default function UploadZone({
     inputRef.current.click();
   }
 
+  const alertText = errorCode ? messages[errorCode] : serverMessage;
+
   return (
     <div
       className="upload-zone"
@@ -63,12 +71,12 @@ export default function UploadZone({
           hidden
           onChange={handleInputChange}
         />
-        <button type="button" data-testid="upload-button" onClick={openPicker}>
+        <button type="button" data-testid="upload-button" onClick={openPicker} disabled={busy}>
           {collapsed ? replaceLabel : actionLabel}
         </button>
-        {errorCode ? (
+        {alertText ? (
           <p className="upload-zone-error" role="alert">
-            {messages[errorCode]}
+            {alertText}
           </p>
         ) : null}
       </div>

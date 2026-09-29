@@ -18,6 +18,13 @@
   border-color: #b42318;
 }
 
+.report-board section[data-status="loading"] .card-skeleton {
+  display: block;
+  height: 72px;
+  border-radius: 8px;
+  background: #d4d4d8;
+}
+
 .report-board section[data-status="unavailable"] p {
   color: #b42318;
 }
