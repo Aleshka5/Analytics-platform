@@ -1,7 +1,7 @@
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
 }
 
 .settings-error {
@@ -14,103 +14,382 @@
   animation: fade-in var(--duration-panel) var(--ease-out);
 }
 
-.settings-section {
+/* Steps: icon, title, and one plain sentence, then the controls. */
+
+.settings-step {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.settings-row {
+.settings-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.settings-step-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--brand-bright);
+}
+
+.settings-step h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.settings-step-head p,
+.settings-empty {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+.settings-empty {
+  padding: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+/* Condition and sort cards */
+
+.settings-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+}
+
+.settings-list:empty {
+  display: none;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface-sunken);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   animation: pop-in var(--duration-panel) var(--ease-out);
+}
+
+.settings-card-top,
+.settings-sort {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-card-rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.settings-card-rule > :only-child {
+  grid-column: 1 / -1;
 }
 
 .settings-form label {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: var(--ink-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
+  min-width: 0;
 }
 
-.settings-form label > select,
-.settings-form label > input:not([type="radio"]):not([type="checkbox"]) {
-  color: var(--ink);
-  font-size: 0.9375rem;
-  font-weight: 400;
+.settings-grow {
+  flex: 1;
 }
 
 .settings-form select,
-.settings-form input:not([type="radio"]):not([type="checkbox"]),
-.settings-form .btn {
+.settings-form input[type="text"] {
   width: 100%;
+  min-width: 0;
 }
 
+.settings-between {
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+}
+
+/* The AND / OR / then connector between cards. */
+.settings-connector {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.settings-connector::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 2px dotted var(--line-strong);
+}
+
+.settings-connector span {
+  position: relative;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.settings-connector[data-combinator="and"] span {
+  background: var(--brand-wash);
+  color: var(--brand-ink);
+  box-shadow: inset 0 0 0 1px rgba(0, 151, 83, 0.35);
+}
+
+.settings-connector[data-combinator="or"] span {
+  background: var(--accent-wash);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(125, 141, 238, 0.5);
+}
+
+/* Buttons */
+
 .settings-add {
+  width: 100%;
   border-style: dashed;
 }
 
-.settings-remove {
-  min-height: 32px;
-  color: var(--danger);
-  font-size: 0.8125rem;
-}
-
-.settings-apply {
-  min-height: 48px;
-}
-
-/* Two radios as one segmented control. */
-.settings-segmented {
+.settings-icon-button {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border-radius: 999px;
-  background: var(--canvas);
-  border: 1px solid var(--line);
-}
-
-.settings-form .settings-segmented label {
-  flex-direction: row;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 999px;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--ink-muted);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out);
 }
 
-.settings-segmented label:has(input:checked) {
-  background: var(--ink);
-  color: var(--on-ink);
+.settings-remove:hover {
+  background: var(--danger-wash);
+  color: var(--danger);
 }
 
-.settings-segmented label:has(input:focus-visible) {
+/* Sort */
+
+.settings-sort-rank {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Green up and red down; the chosen one is tinted and ringed. */
+.direction-toggle {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--canvas);
+}
+
+.direction-toggle button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.4;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.direction-toggle button:hover {
+  opacity: 0.8;
+}
+
+.direction-toggle [data-direction="asc"] {
+  color: var(--brand);
+}
+
+.direction-toggle [data-direction="desc"] {
+  color: var(--danger);
+}
+
+.direction-toggle button[aria-pressed="true"] {
+  opacity: 1;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.direction-toggle [data-direction="asc"][aria-pressed="true"] {
+  background: var(--brand-wash);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+}
+
+.direction-toggle [data-direction="desc"][aria-pressed="true"] {
+  background: var(--danger-wash);
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+
+.direction-toggle button:active {
+  transform: scale(0.92);
+}
+
+.direction-toggle button:focus-visible {
   box-shadow: var(--focus-ring);
 }
 
-.settings-segmented input,
-.settings-chips input {
+/* Picture cards for AND / OR and for the group mode. */
+
+.choice-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  animation: fade-in var(--duration-panel) var(--ease-out);
+}
+
+.settings-form .choice-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.choice-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.choice-card input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
+.choice-card:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+}
+
+.choice-card:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+/* A check badge marks the chosen card. */
+.choice-card:has(input:checked)::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230E1512' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E")
+      center / 12px no-repeat,
+    var(--brand-bright);
+  animation: pop-in var(--duration-fast) var(--ease-out);
+}
+
+.choice-card-title {
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.choice-card-hint {
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.venn-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.venn-fill {
+  fill: var(--brand);
+  fill-opacity: 0.55;
+}
+
+.choice-card:has(input[value="or"]) .venn-fill {
+  fill: var(--accent);
+  fill-opacity: 0.6;
+}
+
+.mini-table rect {
+  rx: 2px;
+  stroke-width: 1;
+}
+
+.mini-table-cell {
+  fill: var(--surface);
+  stroke: var(--line-strong);
+}
+
+.mini-table-key {
+  fill: var(--brand-wash);
+  stroke: var(--brand);
+}
+
+.mini-table-sum {
+  fill: var(--accent-wash);
+  stroke: var(--accent);
+}
+
+.mini-table text {
+  fill: var(--ink);
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
 /* Group columns as toggle chips. */
+
 .settings-chips {
-  flex-direction: row;
+  display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
@@ -118,17 +397,9 @@
   border: 0;
 }
 
-.settings-chips legend {
-  margin-bottom: 8px;
-  padding: 0;
-  color: var(--ink-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
 .settings-form .settings-chips label {
   position: relative;
-  flex-direction: row;
+  align-items: center;
   padding: 6px 12px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
@@ -140,6 +411,12 @@
     border-color var(--duration-fast) var(--ease-out);
 }
 
+.settings-chips input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .settings-chips label:has(input:checked) {
   border-color: var(--brand);
   background: var(--brand-wash);
@@ -147,6 +424,27 @@
   font-weight: 600;
 }
 
+.settings-chips label:has(input:checked)::before {
+  content: "✓";
+  margin-right: 6px;
+}
+
 .settings-chips label:has(input:focus-visible) {
   box-shadow: var(--focus-ring);
+}
+
+/* Apply stays in reach at the bottom of the panel. */
+
+.settings-footer {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -20px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.settings-apply {
+  width: 100%;
+  min-height: 48px;
 }

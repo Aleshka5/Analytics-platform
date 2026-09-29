@@ -80,9 +80,44 @@
   }
 }
 
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.settings-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.settings-close:hover {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
 .settings-scroll {
   flex: 1;
   min-height: 0;
-  padding: 20px;
+  padding: 20px 20px 0;
   overflow-y: auto;
 }

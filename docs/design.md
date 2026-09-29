@@ -127,16 +127,20 @@ Closing the dialog without a choice does not start the cooldown.
 
 Collapsed, it is a semicircle on the right edge, vertically centered. Inside it is an icon of three horizontal lines with a knob on each line, each knob at a different position. The control's accessible name is **Data settings** / **Настройки данных**.
 
-Activating it opens a panel over the page, from the right edge, full height, width `min(420px, 100vw)`, with a dimmed scrim over the rest. The scrim click and the Escape key close the panel and discard the unapplied draft.
+Activating it opens a panel over the page, from the right edge, full height, width `min(420px, 100vw)`, with a dimmed scrim over the rest. The panel header shows **Data settings** / **Настройки данных** and a close cross. The cross, a scrim click, and the Escape key close the panel and discard the unapplied draft.
 
-The panel is one scrollable form:
+The panel is one scrollable form in three steps. Each step has an icon, a title, and one plain sentence, so a first-time user can follow it without help.
 
-1. Combinator toggle: **Match all** / **Все условия** (`and`) and **Match any** / **Любое условие** (`or`).
-2. Filter rows. Each row is a column, an operator, and a value. **Add condition** / **Добавить условие** appends a row. Each row can be removed. Operators offered for a column are only the ones legal for its role in the [operator table](api-contract.md#query-rows).
-3. Sort rows, up to three. Each row is a column and ascending or descending. **Add sort** / **Добавить сортировку** stops at three.
-4. Group columns, one or more, chosen from non-metric columns.
-5. Group mode toggle: **Merged cells** / **Объединённые ячейки** (`rowspan`) and **Aggregated rows** / **Агрегированные строки** (`aggregate`).
-6. **Apply** / **Применить** at the end of the list.
+1. **Filter rows** / **Отбор строк**, "Keep only the rows you need."
+   - With no conditions, a dashed note says every row is shown.
+   - Each condition is a card that reads like a sentence: column, then the operator in words, then the value. Operator words replace the API codes (for example `in` is **is one of** / **одно из**, `gt` is **is greater than** / **больше**). The value placeholder helps: **e.g. UAE, UK** for `is one of`, **from** and **to** for `is between`, **YYYY-MM-DD** for a date column. Operators offered for a column are only the ones legal for its role in the [operator table](api-contract.md#query-rows).
+   - Between two cards a connector pill shows how they combine: **AND** / **И** in green or **OR** / **ИЛИ** in violet.
+   - With two or more conditions, two picture cards above the list choose the combinator. **Match all** / **Все условия** (`and`) shows two circles with only the overlap filled: "A row must pass every condition." **Match any** / **Любое условие** (`or`) shows both circles filled: "A row must pass at least one condition." With fewer than two conditions the choice is hidden, and the stored combinator is kept.
+   - **Add condition** / **Добавить условие** appends a card. A trash button on each card removes it.
+2. **Sort rows** / **Сортировка**, "Choose which rows come first." Up to three numbered cards, joined by **then** / **затем**. Each card is a column and a direction toggle: a green up arrow for ascending and a red down arrow for descending. The arrows carry the accessible names **Ascending** / **Descending**. **Add sort** / **Добавить сортировку** stops at three.
+3. **Group rows** / **Группировка**, "Put rows with the same value together." Non-metric columns are toggle chips. After at least one chip is on, two picture cards choose the mode. **Merged cells** / **Объединённые ячейки** (`rowspan`) shows a mini table whose key cells span two rows: "Every row stays. Equal values share one cell." **Aggregated rows** / **Агрегированные строки** (`aggregate`) shows a shorter mini table with a Σ column: "One row per group, with totals."
+
+**Apply** / **Применить** sits in a footer that stays at the bottom of the panel while the form scrolls.
 
 Apply sends `POST .../rows` with `page: 1`. Success closes the sidebar and opens the data window. **422** keeps the sidebar open and shows `error.message` at the top of the form. The data window stays as it was.
 
@@ -241,6 +245,14 @@ Under `prefers-reduced-motion: reduce` every animation and transition is turned 
 | `settings.addSort` | Add sort | Добавить сортировку |
 | `settings.merged` | Merged cells | Объединённые ячейки |
 | `settings.aggregated` | Aggregated rows | Агрегированные строки |
+| `settings.filterTitle` | Filter rows | Отбор строк |
+| `settings.sortTitle` | Sort rows | Сортировка |
+| `settings.groupTitle` | Group rows | Группировка |
+| `settings.and` / `settings.or` | AND / OR | И / ИЛИ |
+| `settings.then` | then | затем |
+| `operators.*` | is equal to, is greater than, is at least, is less than, is at most, is between, contains, is one of, is empty, is not empty | равно, больше, не меньше, меньше, не больше, между, содержит, одно из, пустое, не пустое |
+
+The step hints, empty notes, card descriptions, and placeholders are in the `settings` block of both locale files.
 | `table.close` | Close | Закрыть |
 | `table.empty` | No rows match these settings | Нет строк по этим настройкам |
 | `export.action` | Export | Экспорт |
