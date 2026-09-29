@@ -61,12 +61,23 @@ _TITLES = {
     ),
 }
 
+_REPORT_TITLES = {
+    "en": "Analytics report",
+    "ru": "Аналитический отчёт",
+}
+
 _NUMERIC = ("column", "count", "mean", "std", "min", "p25", "p50", "p75", "max")
 _OTHER = ("column", "role", "count", "unique", "top", "freq")
 _RANK_LABELS = {
     "en": ("Top", "Worst"),
     "ru": ("Лучшие", "Худшие"),
 }
+
+
+def report_title(lang: str) -> str:
+    """The localized title printed on the first page of the PDF report."""
+
+    return _REPORT_TITLES.get(lang, _REPORT_TITLES["en"])
 
 
 def build_report(dataset: StoredDataset, lang: str) -> tuple[ReportBlock, ...]:

@@ -119,6 +119,21 @@ Then it plays four states:
 
 The format dialog offers **Excel** and **PDF**. The chosen format calls `GET .../report` with the active `lang`. The browser saves the attachment.
 
+<a id="pdf-report"></a>
+
+### PDF report
+
+The PDF uses the [visual style](#visual-style) palette on A4, with DejaVu Sans regular and bold bundled for Cyrillic.
+
+- The first page opens with a dark ink band: the logo mark, the report title, and `filename · export date`, over a thin bright-green rule.
+- Each section heading carries the same `01`–`10` chip as the web cards.
+- Tables have a light header row with uppercase labels, hairline row rules, and zebra rows. API keys become labels (`missing_pct` becomes `Missing %`, `p25` becomes `25%`); column names stay as they are. Numeric columns align right. Numbers are rounded to two decimals and grouped for `lang` (`5,655.33` / `5 655,33`). Column widths follow the widest text, and no column takes more than 40% of the width.
+- **Size** is two stat tiles.
+- **Dynamics** draws the line chart (rounded ticks, 10% area wash, last value) above its table. A table with one or two columns and more than 12 rows flows into three side-by-side columns in bands of 12 rows, so it can break across pages.
+- **Insights** sentences are green notes. The kind and period stay as a table.
+- An unavailable section is a red callout with the message.
+- Every page has a footer: `title · filename · date` on the left and the page number in green on the right.
+
 Closing the dialog without a choice does not start the cooldown.
 
 <a id="sidebar"></a>

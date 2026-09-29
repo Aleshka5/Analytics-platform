@@ -21,6 +21,7 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | 9 | [US-09 Export controls](us-09-export-ui.md) | Both export buttons, format choice, cooldown |
 | 10 | [US-10 Visual polish](us-10-visual-polish.md) | Brand style, layout, chart, and motion |
 | 11 | [US-11 Settings anyone can read](us-11-friendly-settings.md) | Step-by-step settings panel with pictures for AND/OR, sort direction, and group mode |
+| 12 | [US-12 Branded PDF report](us-12-branded-pdf.md) | PDF report in the brand style: title band, numbered sections, chart, formatted numbers |
 
 ## Use-case coverage
 
@@ -34,5 +35,5 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | [UC-6](../use-cases.md#uc-6) Settings | US-05, US-06, US-07, US-11 |
 | [UC-7](../use-cases.md#uc-7) Data window | US-06, US-07 |
 | [UC-8](../use-cases.md#uc-8) Export table | US-08, US-09 |
-| [UC-9](../use-cases.md#uc-9) Export report | US-08, US-09 |
+| [UC-9](../use-cases.md#uc-9) Export report | US-08, US-09, US-12 |
 | [UC-10](../use-cases.md#uc-10) Replace file | US-02, US-03, US-04 |
