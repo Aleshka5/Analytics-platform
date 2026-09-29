@@ -34,10 +34,14 @@ function startedOnButton(event) {
   return Boolean(target?.closest("button"));
 }
 
-export default function ZoomSurface({ children }) {
+export default function ZoomSurface({ children, onReachEnd, watchKey }) {
+  const scrollRef = useRef(null);
+  const contentRef = useRef(null);
+  const onReachEndRef = useRef(onReachEnd);
+  onReachEndRef.current = onReachEnd;
   const coarse = useCoarsePointer();
   const [scale, setScale] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [size, setSize] = useState({ width: 0, height: 0 });
   const scaleRef = useRef(1);
   const pointers = useRef(new Map());
   const pinch = useRef(null);
@@ -66,11 +70,11 @@ export default function ZoomSurface({ children }) {
   }
 
   function onPointerDown(event) {
-    if (startedOnButton(event)) {
+    if (!coarse || startedOnButton(event)) {
       return;
     }
     pointers.current.set(event.pointerId, pointFromEvent(event));
-    if (typeof event.currentTarget.setPointerCapture === "function") {
+    if (pointers.current.size >= 2 && typeof event.currentTarget.setPointerCapture === "function") {
       try {
         event.currentTarget.setPointerCapture(event.pointerId);
       } catch {
@@ -84,9 +88,7 @@ export default function ZoomSurface({ children }) {
     if (!pointers.current.has(event.pointerId)) {
       return;
     }
-    const previous = pointers.current.get(event.pointerId);
-    const point = pointFromEvent(event);
-    pointers.current.set(event.pointerId, point);
+    pointers.current.set(event.pointerId, pointFromEvent(event));
 
     if (pointers.current.size >= 2 && pinch.current) {
       const [a, b] = [...pointers.current.values()];
@@ -94,13 +96,7 @@ export default function ZoomSurface({ children }) {
       if (pinch.current.dist > 0) {
         commitScale(pinch.current.scale * (dist / pinch.current.dist));
       }
-      return;
     }
-
-    setPan((current) => ({
-      x: current.x + (point.x - previous.x),
-      y: current.y + (point.y - previous.y),
-    }));
   }
 
   function onPointerUp(event) {
@@ -110,6 +106,42 @@ export default function ZoomSurface({ children }) {
     pointers.current.delete(event.pointerId);
     capturePinch();
   }
+
+  useEffect(() => {
+    const node = contentRef.current;
+    if (!node) {
+      return undefined;
+    }
+    const measure = () => {
+      const width = node.offsetWidth;
+      const height = node.offsetHeight;
+      setSize((current) => (
+        current.width === width && current.height === height ? current : { width, height }
+      ));
+    };
+    measure();
+    if (typeof ResizeObserver !== "function") {
+      return undefined;
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [watchKey, scale]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !onReachEnd) {
+      return undefined;
+    }
+    const check = () => {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 64) {
+        onReachEndRef.current?.();
+      }
+    };
+    check();
+    el.addEventListener("scroll", check);
+    return () => el.removeEventListener("scroll", check);
+  }, [onReachEnd, watchKey, scale, size]);
 
   return (
     <div
@@ -121,15 +153,24 @@ export default function ZoomSurface({ children }) {
       onPointerCancel={onPointerUp}
     >
       <div
-        className="zoom-surface-content"
-        data-testid="zoom-content"
-        data-scale={scale}
-        style={{
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-          transformOrigin: "top left",
-        }}
+        ref={scrollRef}
+        className="zoom-surface-scroll"
+        data-testid="zoom-scroll"
       >
-        {children}
+        <div
+          className="zoom-surface-sizer"
+          style={{ width: size.width * scale, height: size.height * scale }}
+        >
+          <div
+            ref={contentRef}
+            className="zoom-surface-content"
+            data-testid="zoom-content"
+            data-scale={scale}
+            style={{ transform: `scale(${scale})` }}
+          >
+            {children}
+          </div>
+        </div>
       </div>
       {coarse ? (
         <svg

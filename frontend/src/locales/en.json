@@ -77,9 +77,6 @@
   },
   "table": {
     "close": "Close",
-    "empty": "No rows match these settings",
-    "pageSize": "100 rows",
-    "previous": "Previous",
-    "next": "Next"
+    "empty": "No rows match these settings"
   }
 }

@@ -16,7 +16,7 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | 4 | [US-04 Main page on the API](us-04-main-page-integration.md) | Replace fixtures with the report API |
 | 5 | [US-05 Mock sidebar](us-05-mock-sidebar.md) | Settings tab and form, no request on Apply |
 | 6 | [US-06 Query backend](us-06-query-backend.md) | Filtered, sorted, grouped pages |
-| 7 | [US-07 Apply and data window](us-07-data-window.md) | Apply, table, paging, pan, and zoom |
+| 7 | [US-07 Apply and data window](us-07-data-window.md) | Apply, table, scrolling, and zoom |
 | 8 | [US-08 Export backend](us-08-export-backend.md) | Report file and table file |
 | 9 | [US-09 Export controls](us-09-export-ui.md) | Both export buttons, format choice, cooldown |
 

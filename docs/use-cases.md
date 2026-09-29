@@ -64,11 +64,11 @@ Apply calls `POST .../rows` ([Query rows](api-contract.md#query-rows)). Success 
 
 ## UC-7 — Browse the data window
 
-The window shows the current 100-row page ([Data window](design.md#data-window)). Merged-cell mode paints the page-local `spans`. Aggregated mode shows one row per group.
+The window shows the first 100 matching rows ([Data window](design.md#data-window)). Merged-cell mode paints `spans`. Aggregated mode shows one row per group.
 
-The user drags the surface on both axes and zooms between 50% and 200%. A desktop pointer uses **+** and **−**. A touch pointer pinches, and a looping two-circle hint sits at the bottom-left ([ADR 011](adrs.md#adr-011)).
+The user scrolls the table on both axes with the wheel, the trackpad, or the scrollbars, and zooms between 50% and 200%. A desktop pointer uses **+** and **−**. A touch pointer pinches, and a looping two-circle hint sits at the bottom-left ([ADR 011](adrs.md#adr-011)).
 
-Previous and next load another page with the same settings. The red cross closes the window and keeps those settings for the next Apply.
+Reaching the bottom loads the next 100 rows with the same settings and appends them. The red cross closes the window and keeps those settings for the next Apply.
 
 <a id="uc-8"></a>
 

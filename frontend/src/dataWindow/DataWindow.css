@@ -22,7 +22,7 @@
   }
 }
 
-.data-window > :not(.data-window-close):not(.pagination-bar) {
+.data-window > :not(.data-window-close) {
   flex: 1;
   min-height: 0;
   overflow: hidden;

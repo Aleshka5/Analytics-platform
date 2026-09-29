@@ -112,12 +112,11 @@ test("coarse pointer hides zoom buttons and shows a non-interactive pinch hint",
   expect(window.getComputedStyle(hint).pointerEvents).toBe("none");
 });
 
-test("dragging the surface pans the content", () => {
+test("the table sits in a two-axis scroller and a drag does not move it", () => {
   renderSurface();
-  const surface = screen.getByTestId("zoom-surface");
-  fireEvent.pointerDown(surface, { pointerId: 1, clientX: 0, clientY: 0 });
-  fireEvent.pointerMove(surface, { pointerId: 1, clientX: 20, clientY: 10 });
-  expect(screen.getByTestId("zoom-content").style.transform).toContain(
-    "translate(20px, 10px)",
-  );
+  const scroll = screen.getByTestId("zoom-scroll");
+  expect(scroll.className).toContain("zoom-surface-scroll");
+  fireEvent.pointerDown(scroll, { pointerId: 1, clientX: 0, clientY: 0 });
+  fireEvent.pointerMove(scroll, { pointerId: 1, clientX: 20, clientY: 10 });
+  expect(screen.getByTestId("zoom-content").style.transform).toBe("scale(1)");
 });

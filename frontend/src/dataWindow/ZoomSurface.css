@@ -1,18 +1,55 @@
 .zoom-surface {
   position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
-  touch-action: none;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.zoom-surface-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: scroll;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-color: #a1a1aa #f4f4f5;
+  scrollbar-width: auto;
+}
+
+.zoom-surface-scroll::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.zoom-surface-scroll::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+  border: 2px solid #f4f4f5;
+  border-radius: 6px;
+}
+
+.zoom-surface-scroll::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+
+.zoom-surface-sizer {
+  position: relative;
 }
 
 .zoom-surface-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
   transform-origin: top left;
 }
 
 .zoom-surface-controls {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1;
   display: flex;
   gap: 4px;
 }
@@ -38,7 +75,7 @@
 .zoom-surface-hint {
   position: absolute;
   left: 8px;
-  bottom: 8px;
+  bottom: 20px;
   pointer-events: none;
   color: #18181b;
 }

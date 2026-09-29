@@ -629,11 +629,11 @@ test("paging and close keep the report and the applied draft", async () => {
     fireEvent.click(screen.getByTestId("settings-apply"));
     expect(await screen.findByTestId("data-window")).toHaveTextContent("UAE");
 
-    fireEvent.click(screen.getByTestId("pagination-next"));
     await waitFor(() => {
-      expect(screen.getByTestId("page-label")).toHaveTextContent("2 / 2");
+      expect(screen.getByTestId("data-window")).toHaveTextContent("UK");
     });
-    expect(screen.getByTestId("data-window")).toHaveTextContent("UK");
+    expect(screen.getByTestId("data-window")).toHaveTextContent("UAE");
+    expect(screen.queryByTestId("pagination-next")).not.toBeInTheDocument();
     expect(rows.recorded.at(-1).method).toBe("POST");
     expect(rows.recorded.at(-1).body.page).toBe(2);
     expect(fetchSection.mock.calls).toHaveLength(sectionCalls);

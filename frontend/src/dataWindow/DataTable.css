@@ -23,3 +23,7 @@
 .data-table-empty {
   margin: 0;
 }
+
+.data-table-end {
+  height: 1px;
+}

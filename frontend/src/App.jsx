@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./i18n";
 import "./App.css";
@@ -7,6 +7,7 @@ import SheetDialog from "./components/SheetDialog";
 import UploadZone from "./components/UploadZone";
 import { ApiError, deleteDataset, selectSheet, uploadDataset } from "./api/datasets";
 import { fetchRows } from "./api/rows";
+import { appendRowsPage } from "./dataWindow/appendPage";
 import DataWindow from "./dataWindow/DataWindow";
 import { draftToQueryBody } from "./query/requestBody";
 import ReportBoard from "./report/ReportBoard";
@@ -68,6 +69,7 @@ export default function App() {
   const [settingsDraft, setSettingsDraft] = useState(() => emptyDraft());
   const [appliedDraft, setAppliedDraft] = useState(null);
   const [dataWindow, setDataWindow] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [windowOpen, setWindowOpen] = useState(false);
   const [applyError, setApplyError] = useState(null);
   const [settingsColumns, setSettingsColumns] = useState([]);
@@ -78,6 +80,10 @@ export default function App() {
   const sheetRef = useRef(null);
   const datasetIdRef = useRef(null);
   const rowsRequestRef = useRef(0);
+  const dataWindowRef = useRef(null);
+  const loadedPageRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  dataWindowRef.current = dataWindow;
   const locale = (i18n.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
   const api = {
     uploadDataset: (file) => uploadDataset(file, { lang: locale }),
@@ -93,6 +99,9 @@ export default function App() {
       setSettingsOpen(false);
       setAppliedDraft(null);
       setDataWindow(null);
+      loadedPageRef.current = 0;
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
       setWindowOpen(false);
       setApplyError(null);
     }
@@ -105,6 +114,8 @@ export default function App() {
   }
 
   async function handleSettingsApply() {
+    loadingMoreRef.current = false;
+    setLoadingMore(false);
     const requestId = rowsRequestRef.current + 1;
     rowsRequestRef.current = requestId;
     const requestDatasetId = datasetId;
@@ -116,7 +127,8 @@ export default function App() {
         return;
       }
       setAppliedDraft(JSON.parse(JSON.stringify(draft)));
-      setDataWindow({ body, page: result });
+      loadedPageRef.current = result.page;
+      setDataWindow({ body, loaded: appendRowsPage(null, result) });
       setWindowOpen(true);
       setApplyError(null);
       setSettingsOpen(false);
@@ -132,27 +144,44 @@ export default function App() {
     }
   }
 
-  async function loadPage(page) {
-    if (!datasetId || !dataWindow) {
+  const loadMore = useCallback(async () => {
+    const current = dataWindowRef.current;
+    if (!datasetId || !current || loadingMoreRef.current) {
       return;
     }
-    const requestId = rowsRequestRef.current + 1;
-    rowsRequestRef.current = requestId;
+    const nextPage = loadedPageRef.current + 1;
+    if (current.loaded.total_pages < 1 || nextPage > current.loaded.total_pages) {
+      return;
+    }
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    const requestId = rowsRequestRef.current;
     const requestDatasetId = datasetId;
-    const body = { ...dataWindow.body, page };
+    const body = { ...current.body, page: nextPage };
     try {
       const result = await fetchRows(requestDatasetId, body, { lang: locale });
       if (!rowsRequestIsCurrent(requestId, requestDatasetId)) {
         return;
       }
-      setDataWindow({
-        body: { ...body, page: result.page },
-        page: result,
+      loadedPageRef.current = result.page;
+      setDataWindow((windowState) => {
+        if (!windowState || windowState.loaded.page + 1 !== result.page) {
+          return windowState;
+        }
+        return {
+          body: windowState.body,
+          loaded: appendRowsPage(windowState.loaded, result),
+        };
       });
     } catch {
-      // Keep the page that is already open.
+      // Keep the rows already shown. Panning away and back retries.
+    } finally {
+      if (rowsRequestIsCurrent(requestId, requestDatasetId)) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
     }
-  }
+  }, [datasetId, locale]);
 
   function closeSettings() {
     setSettingsOpen(false);
@@ -303,22 +332,19 @@ export default function App() {
       ) : null}
       {datasetId && windowOpen && dataWindow ? (
         <DataWindow
-          columns={dataWindow.page.columns}
-          rows={dataWindow.page.rows}
-          spans={dataWindow.page.spans}
-          mode={dataWindow.page.group?.mode || dataWindow.body.group?.mode || "rowspan"}
-          page={dataWindow.page.page}
-          totalPages={dataWindow.page.total_pages}
+          columns={dataWindow.loaded.columns}
+          rows={dataWindow.loaded.rows}
+          spans={dataWindow.loaded.spans}
+          mode={dataWindow.loaded.group?.mode || dataWindow.body.group?.mode || "rowspan"}
           locale={locale}
           labels={{
             close: t("table.close"),
             empty: t("table.empty"),
-            pageSize: t("table.pageSize"),
-            previous: t("table.previous"),
-            next: t("table.next"),
           }}
-          onPrevious={() => loadPage(dataWindow.page.page - 1)}
-          onNext={() => loadPage(dataWindow.page.page + 1)}
+          hasMore={
+            !loadingMore && dataWindow.loaded.page < dataWindow.loaded.total_pages
+          }
+          onReachEnd={loadMore}
           onClose={() => setWindowOpen(false)}
         />
       ) : null}

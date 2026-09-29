@@ -68,6 +68,7 @@ export default function DataTable({
   const { skip, merge } = mergedCells(columns, spans, mode);
 
   return (
+    <>
     <table className="data-table" data-testid="data-table">
       <thead>
         <tr>
@@ -101,5 +102,7 @@ export default function DataTable({
         ))}
       </tbody>
     </table>
+    <div className="data-table-end" data-testid="table-end" aria-hidden="true" />
+    </>
   );
 }

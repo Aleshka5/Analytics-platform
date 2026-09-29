@@ -1,5 +1,4 @@
 import DataTable from "./DataTable";
-import PaginationBar from "./PaginationBar";
 import ZoomSurface from "./ZoomSurface";
 import "./DataWindow.css";
 
@@ -8,12 +7,10 @@ export default function DataWindow({
   rows,
   spans,
   mode,
-  page,
-  totalPages,
   locale,
   labels,
-  onPrevious,
-  onNext,
+  hasMore,
+  onReachEnd,
   onClose,
 }) {
   return (
@@ -33,7 +30,7 @@ export default function DataWindow({
       >
         {"\u00d7"}
       </button>
-      <ZoomSurface>
+      <ZoomSurface onReachEnd={hasMore ? onReachEnd : undefined} watchKey={rows?.length || 0}>
         <DataTable
           columns={columns}
           rows={rows}
@@ -43,15 +40,6 @@ export default function DataWindow({
           locale={locale}
         />
       </ZoomSurface>
-      <PaginationBar
-        page={page}
-        totalPages={totalPages}
-        pageSizeLabel={labels.pageSize}
-        previousLabel={labels.previous}
-        nextLabel={labels.next}
-        onPrevious={onPrevious}
-        onNext={onNext}
-      />
     </div>
   );
 }

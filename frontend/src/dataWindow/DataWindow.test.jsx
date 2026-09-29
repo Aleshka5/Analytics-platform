@@ -26,14 +26,10 @@ afterEach(() => {
 const labels = {
   close: "Close",
   empty: "No rows match these settings",
-  pageSize: "100 rows",
-  previous: "Previous",
-  next: "Next",
 };
 
 function renderWindow(overrides = {}) {
-  const onPrevious = vi.fn();
-  const onNext = vi.fn();
+  const onReachEnd = vi.fn();
   const onClose = vi.fn();
   render(
     <DataWindow
@@ -41,20 +37,18 @@ function renderWindow(overrides = {}) {
       rows={[]}
       spans={[]}
       mode="rowspan"
-      page={1}
-      totalPages={0}
       locale="en"
       labels={labels}
-      onPrevious={onPrevious}
-      onNext={onNext}
+      hasMore={false}
+      onReachEnd={onReachEnd}
       onClose={onClose}
       {...overrides}
     />,
   );
-  return { onPrevious, onNext, onClose };
+  return { onReachEnd, onClose };
 }
 
-test("renders dialog, close, pagination, and the empty state", () => {
+test("renders dialog, close, and the empty state", () => {
   renderWindow();
 
   const dialog = screen.getByTestId("data-window");
@@ -65,12 +59,10 @@ test("renders dialog, close, pagination, and the empty state", () => {
     "aria-label",
     "Close",
   );
-  expect(screen.getByTestId("pagination-bar")).toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-bar")).not.toBeInTheDocument();
   expect(screen.getByTestId("data-empty")).toHaveTextContent(
     "No rows match these settings",
   );
-  expect(screen.getByTestId("page-label").textContent).toBe("1 / 0");
-  expect(screen.getByTestId("page-size").textContent).toBe("100 rows");
 });
 
 test("close click calls onClose", () => {
@@ -89,8 +81,7 @@ test("a rowspan fixture renders a merged cell inside the dialog", () => {
     ],
     spans: [{ column: "Region", start_row: 0, length: 2 }],
     mode: "rowspan",
-    page: 1,
-    totalPages: 1,
+    hasMore: false,
   });
 
   const dialog = screen.getByTestId("data-window");
@@ -99,9 +90,23 @@ test("a rowspan fixture renders a merged cell inside the dialog", () => {
   expect(merged).toHaveAttribute("rowspan", "2");
 });
 
-test("pagination bar is not inside the zoomed content", () => {
-  renderWindow();
+test("reaching the end of the table requests the next page", () => {
+  const { onReachEnd } = renderWindow({
+    rows: [{ Region: "UAE", PnL: 10 }],
+    hasMore: true,
+  });
 
-  const zoomContent = screen.getByTestId("zoom-content");
-  expect(zoomContent).not.toContainElement(screen.getByTestId("pagination-bar"));
+  expect(onReachEnd).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId("zoom-content")).toContainElement(
+    screen.getByTestId("table-end"),
+  );
+});
+
+test("the end marker does not request a page when nothing follows", () => {
+  const { onReachEnd } = renderWindow({
+    rows: [{ Region: "UAE", PnL: 10 }],
+    hasMore: false,
+  });
+
+  expect(onReachEnd).not.toHaveBeenCalled();
 });

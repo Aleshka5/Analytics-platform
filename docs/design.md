@@ -146,28 +146,28 @@ A dialog, inset about 24 px from the viewport on wide screens and inset 8 px on 
 
 ### Table
 
-The header row stays visible inside the zoom surface. Body rows are the current page.
+The header row stays visible inside the zoom surface. The window opens on the first page. When the bottom of the loaded rows comes into view, the same query loads the next page and those rows are appended.
 
-`rowspan` mode paints `spans` as merged cells. A value that continues from the previous page is drawn again on the new page, because spans never cross a page.
+`rowspan` mode paints `spans` as merged cells. A group run that continues from the previous page stays one merged cell in the combined table.
 
 `aggregate` mode shows the aggregate headers and one row per group. There are no merged cells.
 
 Empty `rows` with `total_rows: 0` shows an empty state inside the surface: **No rows match these settings** / **Нет строк по этим настройкам**.
 
-### Pagination
+### Loading more rows
 
-A bar pinned to the bottom of the dialog, outside the zoomed surface, shows the page, the total pages, and previous / next. Page size is 100 and is written on the bar as **100 rows** / **100 строк**. Changing page requests that page with the same filter, sort, and group. The previous and next controls are disabled on the first and last page.
+There is no pagination bar. Page size is still 100. Bringing the bottom of the table into the zoom surface requests the next page with the same filter, sort, and group and appends it. The request stops on the last page. The close control stays outside the zoomed surface.
 
-### Pan and zoom
+### Scroll and zoom
 
-The table surface pans on both axes by dragging.
+The table sits in a scroller with a vertical bar and a horizontal bar. A mouse wheel and a two-finger trackpad scroll move it. Dragging does not move the table.
 
 Zoom range is 50% to 200%.
 
 - Fine pointer (desktop): **+** and **−** buttons sit at the bottom-right of the dialog, just above the table-export button. Each step is 10%.
 - Coarse pointer (touch): those buttons are hidden. A pinch gesture on the surface zooms it.
 
-The pagination bar, the close control, and the export button keep a constant size.
+The close control and the export button keep a constant size.
 
 ### Pinch hint
 
@@ -198,7 +198,6 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `settings.aggregated` | Aggregated rows | Агрегированные строки |
 | `table.close` | Close | Закрыть |
 | `table.empty` | No rows match these settings | Нет строк по этим настройкам |
-| `table.pageSize` | 100 rows | 100 строк |
 | `export.action` | Export | Экспорт |
 | `export.excel` | Excel | Excel |
 | `export.csv` | CSV | CSV |

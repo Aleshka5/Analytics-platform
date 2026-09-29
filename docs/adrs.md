@@ -153,11 +153,11 @@ Report cards are not dialogs. The collapsed upload bar remains on the page above
 
 **Accepted.**
 
-- The window pans on both axes by dragging.
+- The window scrolls on both axes with the wheel, the trackpad, and visible scrollbars. Dragging does not move the table.
 - Zoom runs from 50% to 200% in steps of 10%.
 - A fine pointer gets **+** and **−**. A coarse pointer pinches to zoom, and those buttons are hidden.
 - The pinch hint is an inline SVG of two circles, drawn in this repository, looping at the bottom-left. It is not a downloaded animation.
-- Pagination, close, and export stay outside the scaled surface.
+- The scrollbars belong to the table scroller. Close and export stay outside the scaled surface.
 - The red cross closes the window and keeps the applied settings.
 
 <a id="adr-012"></a>
