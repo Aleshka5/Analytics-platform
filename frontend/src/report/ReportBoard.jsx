@@ -59,32 +59,76 @@ function selectorsForSection(section, choices) {
   return {};
 }
 
+const WIDE_CARDS = new Set(["preview", "summary", "timeseries", "insights"]);
+
+function cardClass(name) {
+  return WIDE_CARDS.has(name) ? "card card-wide" : "card";
+}
+
 function ColumnSelect({ label, value, names, onChange }) {
   const current = names.includes(value) ? value : "";
   return (
-    <select aria-label={label} value={current} onChange={(event) => onChange(event.target.value)}>
-      {current === "" ? <option value="" /> : null}
-      {names.map((name) => (
-        <option key={name} value={name}>
-          {name}
-        </option>
-      ))}
-    </select>
+    <label className="card-field">
+      <span aria-hidden="true">{label}</span>
+      <select aria-label={label} value={current} onChange={(event) => onChange(event.target.value)}>
+        {current === "" ? <option value="" /> : null}
+        {names.map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function Card({ name, title, controls, children }) {
+  return (
+    <section data-testid={`card-${name}`} className={cardClass(name)}>
+      <div className="card-head">
+        <h2>{title}</h2>
+        {controls ? <div className="card-controls">{controls}</div> : null}
+      </div>
+      <div className="card-body">{children}</div>
+    </section>
   );
 }
 
 function StatusCard({ card, title }) {
   const status = card.phase === "loading" ? "loading" : "unavailable";
   return (
-    <section data-testid={`card-${card.name}`} data-status={status}>
-      <h2>{title}</h2>
+    <section data-testid={`card-${card.name}`} data-status={status} className={cardClass(card.name)}>
+      <div className="card-head">
+        <h2>{title}</h2>
+      </div>
       {card.phase === "loading" ? (
         <div className="card-skeleton" data-testid="card-skeleton" />
       ) : (
-        <p>{card.message}</p>
+        <p className="card-message">{card.message}</p>
       )}
     </section>
   );
+}
+
+function RoleBadge({ role }) {
+  return (
+    <span className="role-badge" data-role={role}>
+      {role}
+    </span>
+  );
+}
+
+function Bar({ value, max }) {
+  const share = max > 0 && Number.isFinite(value) ? Math.abs(value) / max : 0;
+  return (
+    <span className="bar" aria-hidden="true">
+      <span style={{ width: `${Math.round(share * 100)}%` }} />
+    </span>
+  );
+}
+
+function maxAbs(values) {
+  return Math.max(0, ...values.filter(Number.isFinite).map(Math.abs));
 }
 
 export default function ReportBoard({ datasetId, lang, titles, labels, onColumns, onSettled }) {
@@ -305,293 +349,373 @@ function OkCard({
   onInsightsDate,
 }) {
   const data = card.body?.data ?? {};
+  const cardProps = { name: card.name, title };
 
   if (card.name === "preview") {
     const columns = data.columns ?? [];
     const rows = data.rows ?? [];
+    const numeric = (name) => (roles[name] === "metric" ? "num" : undefined);
     return (
-      <section data-testid="card-preview">
-        <h2>{title}</h2>
-        <table>
-          <thead>
-            <tr>
-              {columns.map((name) => (
-                <th key={name}>{name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={index}>
+      <Card {...cardProps}>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
                 {columns.map((name) => (
-                  <td key={name}>{displayCell(row[name], roles[name], lang, empty)}</td>
+                  <th key={name} className={numeric(name)}>
+                    {name}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={index}>
+                  {columns.map((name) => (
+                    <td key={name} className={numeric(name)}>
+                      {displayCell(row[name], roles[name], lang, empty)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     );
   }
 
   if (card.name === "columns") {
     return (
-      <section data-testid="card-columns">
-        <h2>{title}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>{labels.name}</th>
-              <th>{labels.role}</th>
-              <th>{labels.distinct}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data.columns ?? []).map((column) => (
-              <tr key={column.name}>
-                <td>{column.name}</td>
-                <td>{column.role}</td>
-                <td>{displayNumber(column.unique_count, lang, empty)}</td>
+      <Card {...cardProps}>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{labels.name}</th>
+                <th>{labels.role}</th>
+                <th className="num">{labels.distinct}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {(data.columns ?? []).map((column) => (
+                <tr key={column.name}>
+                  <td>{column.name}</td>
+                  <td>
+                    <RoleBadge role={column.role} />
+                  </td>
+                  <td className="num">{displayNumber(column.unique_count, lang, empty)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     );
   }
 
   if (card.name === "shape") {
     return (
-      <section data-testid="card-shape">
-        <h2>{title}</h2>
-        <p>
-          {labels.rowCount} {displayNumber(data.row_count, lang, empty)}
-        </p>
-        <p>
-          {labels.columnCount} {displayNumber(data.column_count, lang, empty)}
-        </p>
-      </section>
+      <Card {...cardProps}>
+        <div className="stat-row">
+          <p className="stat">
+            <span className="stat-label">{labels.rowCount}</span>{" "}
+            <span className="stat-value">{displayNumber(data.row_count, lang, empty)}</span>
+          </p>
+          <p className="stat">
+            <span className="stat-label">{labels.columnCount}</span>{" "}
+            <span className="stat-value">{displayNumber(data.column_count, lang, empty)}</span>
+          </p>
+        </div>
+      </Card>
     );
   }
 
   if (card.name === "dtypes") {
     return (
-      <section data-testid="card-dtypes">
-        <h2>{title}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>{labels.name}</th>
-              <th>{labels.dtype}</th>
-              <th>{labels.role}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data.columns ?? []).map((column) => (
-              <tr key={column.name}>
-                <td>{column.name}</td>
-                <td>{column.dtype}</td>
-                <td>{column.role}</td>
+      <Card {...cardProps}>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{labels.name}</th>
+                <th>{labels.dtype}</th>
+                <th>{labels.role}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {(data.columns ?? []).map((column) => (
+                <tr key={column.name}>
+                  <td>{column.name}</td>
+                  <td>
+                    <code>{column.dtype}</code>
+                  </td>
+                  <td>
+                    <RoleBadge role={column.role} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     );
   }
 
   if (card.name === "missing") {
     return (
-      <section data-testid="card-missing">
-        <h2>{title}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>{labels.name}</th>
-              <th>{labels.missingCount}</th>
-              <th>{labels.missingPercent}</th>
-              <th>{labels.filled}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data.columns ?? []).map((column) => (
-              <tr key={column.name}>
-                <td>{column.name}</td>
-                <td>{displayNumber(column.missing_count, lang, empty)}</td>
-                <td>{displayNumber(column.missing_pct, lang, empty)}</td>
-                <td>{displayNumber(column.non_null_count, lang, empty)}</td>
+      <Card {...cardProps}>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{labels.name}</th>
+                <th className="num">{labels.missingCount}</th>
+                <th>{labels.missingPercent}</th>
+                <th className="num">{labels.filled}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {(data.columns ?? []).map((column) => (
+                <tr key={column.name}>
+                  <td>{column.name}</td>
+                  <td className="num">{displayNumber(column.missing_count, lang, empty)}</td>
+                  <td>
+                    <span className="meter-cell">
+                      <span className="meter" aria-hidden="true">
+                        <span style={{ width: `${Math.min(100, column.missing_pct || 0)}%` }} />
+                      </span>
+                      <span className="num">{displayNumber(column.missing_pct, lang, empty)}</span>
+                    </span>
+                  </td>
+                  <td className="num">{displayNumber(column.non_null_count, lang, empty)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     );
   }
 
   if (card.name === "summary") {
     return (
-      <section data-testid="card-summary">
-        <h2>{title}</h2>
-        <div>
-          <p>{labels.numeric}</p>
+      <Card {...cardProps}>
+        <h3 className="card-subhead">{labels.numeric}</h3>
+        <div className="tile-grid">
           {(data.numeric ?? []).map((stat) => (
-            <div key={stat.column}>
-              <p>{stat.column}</p>
-              {NUMERIC_STATS.map((field) => (
-                <p key={field}>
-                  {labels[field]} {displayNumber(stat[field], lang, empty)}
-                </p>
-              ))}
+            <div key={stat.column} className="tile">
+              <h4>{stat.column}</h4>
+              <dl>
+                {NUMERIC_STATS.map((field) => (
+                  <div key={field}>
+                    <dt>{labels[field]}</dt> <dd>{displayNumber(stat[field], lang, empty)}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           ))}
         </div>
-        <div>
-          <p>{labels.other}</p>
+        <h3 className="card-subhead">{labels.other}</h3>
+        <div className="tile-grid">
           {(data.other ?? []).map((stat) => (
-            <div key={stat.column}>
-              <p>{stat.column}</p>
-              <p>
-                {labels.count} {displayNumber(stat.count, lang, empty)}
-              </p>
-              <p>
-                {labels.unique} {displayNumber(stat.unique, lang, empty)}
-              </p>
-              <p>
-                {labels.topValue} {stat.top}
-              </p>
-              <p>
-                {labels.frequency} {displayNumber(stat.freq, lang, empty)}
-              </p>
+            <div key={stat.column} className="tile">
+              <h4>{stat.column}</h4>
+              <dl>
+                <div>
+                  <dt>{labels.count}</dt> <dd>{displayNumber(stat.count, lang, empty)}</dd>
+                </div>
+                <div>
+                  <dt>{labels.unique}</dt> <dd>{displayNumber(stat.unique, lang, empty)}</dd>
+                </div>
+                <div>
+                  <dt>{labels.topValue}</dt> <dd>{stat.top}</dd>
+                </div>
+                <div>
+                  <dt>{labels.frequency}</dt> <dd>{displayNumber(stat.freq, lang, empty)}</dd>
+                </div>
+              </dl>
             </div>
           ))}
         </div>
-      </section>
+      </Card>
     );
   }
 
   if (card.name === "ranking") {
     const metric = data.metric;
+    const top = data.top ?? [];
+    const worst = data.worst ?? [];
+    const max = maxAbs([...top, ...worst].map((row) => row.values?.[metric]));
+    const contextColumns = Object.keys(roles)
+      .filter((name) => roles[name] === "text" || roles[name] === "category")
+      .slice(0, 2);
+    const side = (key, rows) => (
+      <div className="ranking-side" data-side={key}>
+        <h3 className="card-subhead">{labels[key]}</h3>
+        <ol>
+          {rows.map((row) => (
+            <li key={row.rank}>
+              <span className="ranking-rank">{row.rank}</span>
+              <span className="ranking-main">
+                <span className="ranking-line">
+                  <span className="ranking-value">{displayNumber(row.values?.[metric], lang, empty)}</span>
+                  <span className="ranking-context">
+                    {contextColumns
+                      .map((name) => row.values?.[name])
+                      .filter((value) => value != null && value !== "")
+                      .join(" · ")}
+                  </span>
+                </span>
+                <Bar value={row.values?.[metric]} max={max} />
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    );
     return (
-      <section data-testid="card-ranking">
-        <h2>{title}</h2>
-        {options.metrics.length > 0 ? (
-          <ColumnSelect
-            label={labels.metric}
-            value={choices.rankingMetric}
-            names={options.metrics}
-            onChange={onRankingMetric}
-          />
-        ) : null}
-        <div>
-          <p>{labels.top}</p>
-          <ul>
-            {(data.top ?? []).map((row) => (
-              <li key={row.rank}>{displayNumber(row.values?.[metric], lang, empty)}</li>
-            ))}
-          </ul>
+      <Card
+        {...cardProps}
+        controls={
+          options.metrics.length > 0 ? (
+            <ColumnSelect
+              label={labels.metric}
+              value={choices.rankingMetric}
+              names={options.metrics}
+              onChange={onRankingMetric}
+            />
+          ) : null
+        }
+      >
+        <div className="ranking">
+          {side("top", top)}
+          {side("worst", worst)}
         </div>
-        <div>
-          <p>{labels.worst}</p>
-          <ul>
-            {(data.worst ?? []).map((row) => (
-              <li key={row.rank}>{displayNumber(row.values?.[metric], lang, empty)}</li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      </Card>
     );
   }
 
   if (card.name === "grouping") {
+    const groups = data.groups ?? [];
+    const max = maxAbs(groups.map((group) => group.sum));
     return (
-      <section data-testid="card-grouping">
-        <h2>{title}</h2>
-        {options.categories.length > 0 ? (
-          <ColumnSelect
-            label={labels.category}
-            value={choices.groupingCategory}
-            names={options.categories}
-            onChange={onGroupingCategory}
-          />
-        ) : null}
-        {options.metrics.length > 0 ? (
-          <ColumnSelect
-            label={labels.metric}
-            value={choices.groupingMetric}
-            names={options.metrics}
-            onChange={onGroupingMetric}
-          />
-        ) : null}
-        <table>
-          <thead>
-            <tr>
-              <th>{labels.value}</th>
-              <th>{labels.count}</th>
-              <th>{labels.sum}</th>
-              <th>{labels.mean}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data.groups ?? []).map((group, index) => (
-              <tr key={`${group.value ?? ""}-${index}`}>
-                <td>{group.value == null || group.value === "" ? empty : String(group.value)}</td>
-                <td>{displayNumber(group.count, lang, empty)}</td>
-                <td>{displayNumber(group.sum, lang, empty)}</td>
-                <td>{displayNumber(group.mean, lang, empty)}</td>
+      <Card
+        {...cardProps}
+        controls={
+          <>
+            {options.categories.length > 0 ? (
+              <ColumnSelect
+                label={labels.category}
+                value={choices.groupingCategory}
+                names={options.categories}
+                onChange={onGroupingCategory}
+              />
+            ) : null}
+            {options.metrics.length > 0 ? (
+              <ColumnSelect
+                label={labels.metric}
+                value={choices.groupingMetric}
+                names={options.metrics}
+                onChange={onGroupingMetric}
+              />
+            ) : null}
+          </>
+        }
+      >
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{labels.value}</th>
+                <th className="num">{labels.count}</th>
+                <th>{labels.sum}</th>
+                <th className="num">{labels.mean}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {data.truncated ? <p>{labels.truncated}</p> : null}
-      </section>
+            </thead>
+            <tbody>
+              {groups.map((group, index) => (
+                <tr key={`${group.value ?? ""}-${index}`}>
+                  <td>{group.value == null || group.value === "" ? empty : String(group.value)}</td>
+                  <td className="num">{displayNumber(group.count, lang, empty)}</td>
+                  <td>
+                    <span className="meter-cell">
+                      <Bar value={group.sum} max={max} />
+                      <span className="num">{displayNumber(group.sum, lang, empty)}</span>
+                    </span>
+                  </td>
+                  <td className="num">{displayNumber(group.mean, lang, empty)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {data.truncated ? <p className="card-note">{labels.truncated}</p> : null}
+      </Card>
     );
   }
 
   if (card.name === "timeseries") {
     return (
-      <section data-testid="card-timeseries">
-        <h2>{title}</h2>
-        {options.dates.length > 0 ? (
-          <ColumnSelect
-            label={labels.date}
-            value={choices.timeseriesDate}
-            names={options.dates}
-            onChange={onTimeseriesDate}
-          />
-        ) : null}
-        {options.metrics.length > 0 ? (
-          <ColumnSelect
-            label={labels.metric}
-            value={choices.timeseriesMetric}
-            names={options.metrics}
-            onChange={onTimeseriesMetric}
-          />
-        ) : null}
-        <p>{data.grain}</p>
+      <Card
+        {...cardProps}
+        controls={
+          <>
+            {options.dates.length > 0 ? (
+              <ColumnSelect
+                label={labels.date}
+                value={choices.timeseriesDate}
+                names={options.dates}
+                onChange={onTimeseriesDate}
+              />
+            ) : null}
+            {options.metrics.length > 0 ? (
+              <ColumnSelect
+                label={labels.metric}
+                value={choices.timeseriesMetric}
+                names={options.metrics}
+                onChange={onTimeseriesMetric}
+              />
+            ) : null}
+          </>
+        }
+      >
+        {data.grain ? <span className="chip">{labels[data.grain] ?? data.grain}</span> : null}
         <LineChart points={data.points ?? []} locale={lang} />
-      </section>
+      </Card>
     );
   }
 
   if (card.name === "insights") {
     const items = data.items ?? [];
     return (
-      <section data-testid="card-insights">
-        <h2>{title}</h2>
-        {options.dates.length > 0 ? (
-          <ColumnSelect
-            label={labels.date}
-            value={choices.insightsDate}
-            names={options.dates}
-            onChange={onInsightsDate}
-          />
-        ) : null}
-        <ul>
+      <Card
+        {...cardProps}
+        controls={
+          options.dates.length > 0 ? (
+            <ColumnSelect
+              label={labels.date}
+              value={choices.insightsDate}
+              names={options.dates}
+              onChange={onInsightsDate}
+            />
+          ) : null
+        }
+      >
+        <ul className="insights">
           {items.map((item, index) => (
-            <li key={index}>{item.text}</li>
+            <li key={index} style={{ "--item": index }}>
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span>{item.text}</span>
+            </li>
           ))}
         </ul>
-      </section>
+      </Card>
     );
   }
 

@@ -147,7 +147,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
           {errorMessage}
         </p>
       ) : null}
-      <div className="settings-section">
+      <div className="settings-segmented">
         <label className="settings-choice">
           <input
             type="radio"
@@ -173,6 +173,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
       <div className="settings-section">
         <button
           type="button"
+          className="btn settings-add"
           data-testid="settings-add-condition"
           disabled={columns.length === 0}
           onClick={() => onChange(addCondition(draft, columns))}
@@ -238,6 +239,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
             />
             <button
               type="button"
+              className="btn settings-remove"
               onClick={() => onChange(removeCondition(draft, index))}
             >
               {t("settings.remove")}
@@ -249,6 +251,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
       <div className="settings-section">
         <button
           type="button"
+          className="btn settings-add"
           data-testid="settings-add-sort"
           disabled={!canAddSort(draft)}
           onClick={() => onChange(addSort(draft, columns))}
@@ -289,6 +292,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
             </select>
             <button
               type="button"
+              className="btn settings-remove"
               onClick={() => onChange(removeSort(draft, index))}
             >
               {t("settings.remove")}
@@ -297,7 +301,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
         ))}
       </div>
 
-      <fieldset className="settings-section">
+      <fieldset className="settings-section settings-chips">
         <legend>{t("settings.groupColumns")}</legend>
         {columns
           .filter((column) => column.role !== "metric")
@@ -316,7 +320,7 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
           ))}
       </fieldset>
 
-      <div className="settings-section">
+      <div className="settings-segmented">
         <label className="settings-choice">
           <input
             type="radio"
@@ -339,7 +343,12 @@ export default function SettingsForm({ columns, draft, onChange, onApply, errorM
         </label>
       </div>
 
-      <button type="button" data-testid="settings-apply" onClick={() => onApply()}>
+      <button
+        type="button"
+        className="btn btn-primary settings-apply"
+        data-testid="settings-apply"
+        onClick={() => onApply()}
+      >
         {t("settings.apply")}
       </button>
     </form>

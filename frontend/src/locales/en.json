@@ -4,7 +4,10 @@
     "action": "Upload file",
     "replace": "Replace file",
     "tooLarge": "The file is larger than 100 MB.",
-    "unsupported": "This file type is not supported."
+    "unsupported": "This file type is not supported.",
+    "title": "Drop a file to build the report",
+    "hint": "CSV, TSV, XLSX, XLS, JSON or Parquet · up to 100 MB",
+    "replaceHint": "or drop a new file here"
   },
   "cards": {
     "preview": "Preview",
@@ -48,7 +51,9 @@
     "topValue": "Top value",
     "frequency": "Frequency",
     "value": "Value",
-    "sum": "Sum"
+    "sum": "Sum",
+    "day": "Day",
+    "month": "Month"
   },
   "unavailable": {
     "no_insight_inputs": "There is no date column, no empty values, and no categorical column to describe."

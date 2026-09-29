@@ -57,7 +57,7 @@ export default function FormatDialog({
             <button
               key={format.id}
               type="button"
-              className="format-dialog-button"
+              className="btn format-dialog-button"
               data-testid={`format-${format.id}`}
               onClick={() => onConfirm(format.id)}
             >
@@ -67,7 +67,7 @@ export default function FormatDialog({
         </div>
         <button
           type="button"
-          className="format-dialog-dismiss"
+          className="btn format-dialog-dismiss"
           data-testid="format-dismiss"
           onClick={onDismiss}
         >

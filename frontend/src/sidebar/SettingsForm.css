@@ -1,45 +1,152 @@
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .settings-error {
-  margin: 0 0 8px;
-  color: #b42318;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-wash);
+  color: var(--danger);
+  animation: fade-in var(--duration-panel) var(--ease-out);
 }
 
-.settings-section,
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .settings-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  animation: pop-in var(--duration-panel) var(--ease-out);
 }
 
 .settings-form label {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
-.settings-choice {
-  flex-direction: row;
-  align-items: center;
-}
-
-.settings-form fieldset {
-  margin: 0;
-  padding: 8px;
-  border: 1px solid #e4e4e7;
+.settings-form label > select,
+.settings-form label > input:not([type="radio"]):not([type="checkbox"]) {
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 400;
 }
 
 .settings-form select,
 .settings-form input:not([type="radio"]):not([type="checkbox"]),
-.settings-form button {
+.settings-form .btn {
   width: 100%;
-  box-sizing: border-box;
 }
 
-.settings-form button[type="button"] {
-  position: static;
+.settings-add {
+  border-style: dashed;
+}
+
+.settings-remove {
+  min-height: 32px;
+  color: var(--danger);
+  font-size: 0.8125rem;
+}
+
+.settings-apply {
+  min-height: 48px;
+}
+
+/* Two radios as one segmented control. */
+.settings-segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+}
+
+.settings-form .settings-segmented label {
+  flex-direction: row;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.settings-segmented label:has(input:checked) {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.settings-segmented label:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.settings-segmented input,
+.settings-chips input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Group columns as toggle chips. */
+.settings-chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-chips legend {
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.settings-form .settings-chips label {
+  position: relative;
+  flex-direction: row;
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.settings-chips label:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-wash);
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+
+.settings-chips label:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
 }

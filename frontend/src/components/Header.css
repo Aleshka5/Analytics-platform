@@ -6,39 +6,103 @@ header {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e4e4e7;
-  min-height: var(--header-height);
   height: var(--header-height);
-  box-sizing: border-box;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header-mark {
+  flex-shrink: 0;
+}
+
+.header-mark rect {
+  fill: var(--ink);
+}
+
+.header-mark path {
+  fill: none;
+  stroke: var(--brand-bright);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 26;
+  animation: header-mark-draw 900ms var(--ease-out) both;
+}
+
+@keyframes header-mark-draw {
+  from {
+    stroke-dashoffset: 26;
+  }
 }
 
 header h1 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  min-width: 0;
+  overflow: hidden;
+  font-size: 1.125rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
+/* Segmented control: the ::before thumb slides under the pressed button. */
 .header-languages {
-  display: flex;
-  flex-direction: row;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   flex-shrink: 0;
-  gap: 8px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+}
+
+.header-languages::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-panel) var(--ease-out);
+}
+
+.header-languages[data-active="en"]::before {
+  transform: translateX(100%);
 }
 
 .header-languages button {
-  background: #fff;
-  color: inherit;
-  border: 1px solid #d4d4d8;
-  border-radius: 6px;
+  position: relative;
+  min-width: 44px;
   padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  transition: color var(--duration-panel) var(--ease-out);
 }
 
 .header-languages button[aria-pressed="true"] {
-  background: #18181b;
-  color: #fff;
-  border-color: #18181b;
+  color: var(--on-ink);
+}
+
+@media (max-width: 640px) {
+  header {
+    padding: 0 16px;
+  }
 }

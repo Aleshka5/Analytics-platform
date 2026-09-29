@@ -5,16 +5,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
+  padding: 16px;
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
+  animation: fade-in var(--duration-panel) var(--ease-out);
 }
 
 .format-dialog {
-  background: #fff;
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  padding: 16px;
-  max-width: 420px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  width: min(420px, 100%);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: pop-in var(--duration-panel) var(--ease-out);
 }
 
 .format-dialog-title {
@@ -24,32 +27,35 @@
 
 .format-error {
   margin: 12px 0 0;
-  color: #b42318;
+  padding: 10px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-wash);
+  color: var(--danger);
 }
 
 .format-dialog-formats {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 8px;
-  margin: 12px 0;
+  margin: 16px 0;
 }
 
-.format-dialog-button,
-.format-dialog-dismiss {
-  border-radius: 8px;
-  padding: 8px 16px;
-  font: inherit;
-  cursor: pointer;
-}
-
+/* Format choices are large tiles; hover fills them with the brand green. */
 .format-dialog-button {
-  background: #18181b;
-  color: #fff;
-  border: 1px solid #18181b;
+  min-height: 64px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+}
+
+.format-dialog-button:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--brand-bright);
+  box-shadow: 0 6px 20px rgba(26, 226, 118, 0.35);
 }
 
 .format-dialog-dismiss {
-  background: #fff;
-  color: #18181b;
-  border: 1px solid #e4e4e7;
+  width: 100%;
+  border-color: transparent;
+  color: var(--ink-muted);
 }

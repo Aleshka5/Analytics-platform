@@ -19,6 +19,7 @@ Automated tests are pytest for the API and Vitest with React Testing Library for
 | 7 | [US-07 Apply and data window](us-07-data-window.md) | Apply, table, scrolling, and zoom |
 | 8 | [US-08 Export backend](us-08-export-backend.md) | Report file and table file |
 | 9 | [US-09 Export controls](us-09-export-ui.md) | Both export buttons, format choice, cooldown |
+| 10 | [US-10 Visual polish](us-10-visual-polish.md) | Brand style, layout, chart, and motion |
 
 ## Use-case coverage
 

@@ -12,11 +12,196 @@ body,
 }
 
 :root {
-  --header-height: 56px;
+  --header-height: 64px;
+
+  /* Freedom Broker palette. See docs/design.md#visual-style. */
+  --brand: #009753;
+  --brand-bright: #1ae276;
+  --brand-bright-hover: #14cc69;
+  --brand-ink: #007a43;
+  --brand-wash: rgba(0, 151, 83, 0.1);
+  --brand-tint: #eefbf4;
+  --accent: #7d8dee;
+  --accent-wash: rgba(125, 141, 238, 0.14);
+  --ink: #0e1512;
+  --ink-muted: #5b6660;
+  --on-ink: #fff;
+  --on-ink-muted: #c4cec8;
+  --canvas: #f4f7f5;
+  --surface: #fff;
+  --surface-sunken: #f7f9f8;
+  --surface-stripe: #fafbfa;
+  --skeleton: #eef2ef;
+  --line: #e2e8e4;
+  --line-strong: #cbd4ce;
+  --danger: #b42318;
+  --danger-wash: #fef3f2;
+  --danger-wash-strong: #fde2df;
+  --warning: #dc6803;
+  --warning-wash: #fff4e5;
+  --scrim: rgba(14, 21, 18, 0.5);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgba(14, 21, 18, 0.06);
+  --shadow-md: 0 2px 4px rgba(14, 21, 18, 0.04), 0 8px 24px rgba(14, 21, 18, 0.08);
+  --shadow-lg: 0 12px 48px rgba(14, 21, 18, 0.18);
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--brand);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-panel: 250ms;
+  --duration-enter: 450ms;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  background: #f4f4f5;
-  color: #18181b;
+  font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Shared buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: transparent;
+  background: var(--brand-bright);
+  color: var(--ink);
+  box-shadow: 0 6px 20px rgba(26, 226, 118, 0.35);
+}
+
+.btn-primary:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--brand-bright-hover);
+  box-shadow: 0 8px 28px rgba(26, 226, 118, 0.45);
+}
+
+.btn-primary:disabled {
+  box-shadow: none;
+}
+
+/* Shared form fields */
+
+select,
+input[type="text"] {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%235B6660' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+
+select:hover,
+input[type="text"]:hover {
+  border-color: var(--ink-muted);
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: var(--brand);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

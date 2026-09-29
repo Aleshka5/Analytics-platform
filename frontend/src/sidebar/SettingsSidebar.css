@@ -2,24 +2,49 @@
   position: fixed;
   right: 0;
   top: 50%;
-  transform: translateY(-50%);
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 48px;
   height: 96px;
-  padding: 0;
-  border: 1px solid #e4e4e7;
-  border-right: 0;
+  padding: 0 0 0 6px;
+  border: 0;
   border-radius: 48px 0 0 48px;
-  background: #fff;
-  color: #18181b;
+  background: var(--ink);
+  color: var(--brand-bright);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    width var(--duration-panel) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.settings-tab:hover {
+  width: 56px;
 }
 
 .settings-tab svg {
   display: block;
+}
+
+/* On hover the knobs slide along their lines, like a mixer. */
+.settings-tab svg circle {
+  fill: var(--ink);
+  transition: transform var(--duration-panel) var(--ease-out);
+}
+
+.settings-tab:hover circle:nth-of-type(1) {
+  transform: translateX(5px);
+}
+
+.settings-tab:hover circle:nth-of-type(2) {
+  transform: translateX(-5px);
+}
+
+.settings-tab:hover circle:nth-of-type(3) {
+  transform: translateX(4px);
 }
 
 .settings-scrim {
@@ -29,7 +54,9 @@
   bottom: 0;
   left: 0;
   z-index: 3;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
+  animation: fade-in var(--duration-panel) var(--ease-out);
 }
 
 .settings-panel {
@@ -42,13 +69,20 @@
   width: min(420px, 100vw);
   height: calc(100% - var(--header-height));
   overflow: hidden;
-  background: #fff;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: settings-slide-in 320ms var(--ease-out);
+}
+
+@keyframes settings-slide-in {
+  from {
+    transform: translateX(100%);
+  }
 }
 
 .settings-scroll {
   flex: 1;
   min-height: 0;
-  padding: 16px;
+  padding: 20px;
   overflow-y: auto;
 }

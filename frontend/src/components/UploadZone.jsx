@@ -6,6 +6,9 @@ export default function UploadZone({
   collapsed,
   actionLabel,
   replaceLabel,
+  title,
+  hint,
+  replaceHint,
   messages,
   onAccepted,
   busy = false,
@@ -13,6 +16,9 @@ export default function UploadZone({
 }) {
   const inputRef = useRef(null);
   const [errorCode, setErrorCode] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  // dragenter and dragleave also fire for children, so count the nesting depth.
+  const dragDepthRef = useRef(0);
 
   function handleFiles(fileList) {
     if (busy) {
@@ -40,12 +46,27 @@ export default function UploadZone({
     event.target.value = "";
   }
 
+  function handleDragEnter(event) {
+    event.preventDefault();
+    dragDepthRef.current += 1;
+    setDragging(true);
+  }
+
+  function handleDragLeave() {
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setDragging(false);
+    }
+  }
+
   function handleDragOver(event) {
     event.preventDefault();
   }
 
   function handleDrop(event) {
     event.preventDefault();
+    dragDepthRef.current = 0;
+    setDragging(false);
     handleFiles(event.dataTransfer.files);
   }
 
@@ -60,6 +81,9 @@ export default function UploadZone({
       className="upload-zone"
       data-testid="upload-zone"
       data-collapsed={collapsed ? "true" : "false"}
+      data-dragging={dragging ? "true" : "false"}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -71,9 +95,36 @@ export default function UploadZone({
           hidden
           onChange={handleInputChange}
         />
-        <button type="button" data-testid="upload-button" onClick={openPicker} disabled={busy}>
-          {collapsed ? replaceLabel : actionLabel}
-        </button>
+        {collapsed ? null : (
+          <>
+            <span className="upload-zone-icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 16V4m0 0L7 9m5-5l5 5M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            {title ? <p className="upload-zone-title">{title}</p> : null}
+            {hint ? <p className="upload-zone-hint">{hint}</p> : null}
+          </>
+        )}
+        <div className="upload-zone-actions">
+          <button
+            type="button"
+            className={collapsed ? "btn" : "btn btn-primary upload-zone-button"}
+            data-testid="upload-button"
+            onClick={openPicker}
+            disabled={busy}
+          >
+            {busy ? <span className="spinner" aria-hidden="true" /> : null}
+            {collapsed ? replaceLabel : actionLabel}
+          </button>
+          {collapsed && replaceHint ? <span className="upload-zone-hint">{replaceHint}</span> : null}
+        </div>
         {alertText ? (
           <p className="upload-zone-error" role="alert">
             {alertText}

@@ -29,13 +29,17 @@ Top to bottom:
 3. Report cards, in the [call order](api-contract.md#conventions), stacked with a gap between them.
 4. Nothing else in the document flow. The settings tab, the data window, and the report export button are attached to the viewport.
 
-The page background is neutral. Cards are white with a light border. Unavailable cards use a red border and red message text (`#b42318` on a `#fef3f2` fill).
+Colors, type, and motion follow the [visual style](#visual-style). Unavailable cards use a red border and red message text (`#b42318` on a `#fef3f2` fill).
+
+On screens at least 960 px wide the cards sit in a two-column grid. Preview, Summary, Dynamics, and Insights span both columns. The other cards pair up in call order. Narrower screens use one column.
 
 <a id="upload-zone"></a>
 
 ## Upload zone
 
-Before a file is accepted, the zone fills the viewport under the header. A dashed area covers that space. Centered in the viewport is a button labeled **Upload file** / **Загрузить файл**.
+Before a file is accepted, the zone fills the viewport under the header. A dashed area covers that space. Centered in the viewport are an upload icon, the headline **Drop a file to build the report** / **Перетащите файл, чтобы построить отчёт**, the format hint, and a button labeled **Upload file** / **Загрузить файл**.
+
+While a file is dragged over the zone, the dashed border turns brand green and the area gets a green wash. The mark clears when the file leaves or drops.
 
 The same action accepts a file in two ways:
 
@@ -44,17 +48,17 @@ The same action accepts a file in two ways:
 
 The browser refuses a file larger than 100 MB before the request, with the localized `file_too_large` sentence under the button. The server repeats that check. An extension outside the allowed list shows the localized `unsupported_format` sentence under the button, and the zone stays as it was.
 
-While the upload request is in flight, the button is disabled and shows a progress label.
+While the upload request is in flight, the button is disabled and shows a spinner.
 
 ### After a ready dataset
 
-The zone collapses upward into a single bar. The button label becomes **Replace file** / **Заменить файл**. The collapsed bar still accepts a drop.
+The zone collapses upward into a single bar. The button label becomes **Replace file** / **Заменить файл**, with the hint **or drop a new file here** / **или перетащите новый файл сюда** beside it. The collapsed bar still accepts a drop.
 
 Replace uploads the new file first. Only a `ready` response, or a finished sheet selection that becomes `ready`, swaps the page: the previous dataset is deleted, report cards clear, the sidebar draft resets, and an open data window closes. A failed upload leaves the current dataset on screen and shows the error under the button.
 
 ### Several worksheets
 
-When the upload returns `sheet_required`, a dialog lists `sheets`. The zone stays expanded and the report does not start. The actions are **Confirm** / **Подтвердить** and **Cancel** / **Отмена**. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
+When the upload returns `sheet_required`, a dialog centered over a dimmed page lists `sheets`. The zone stays expanded and the report does not start. The actions are **Confirm** / **Подтвердить** and **Cancel** / **Отмена**. Confirming a sheet calls `PUT .../sheet`. Cancel deletes the new dataset. If this upload was a replace, cancel keeps the previous dataset.
 
 <a id="report-sequence"></a>
 
@@ -82,15 +86,15 @@ On the sample file the selectors start at `Quantity`, `Region`, and `Transaction
 ### Card contents
 
 - **Preview.** A table of up to 20 rows. Column names are the field names.
-- **Columns.** Name, role, distinct count.
-- **Size.** Row count and column count.
+- **Columns.** Name, role, distinct count. Roles here and in Data types are small badges.
+- **Size.** Two stat tiles: row count and column count.
 - **Data types.** Name, pandas dtype, role.
-- **Missing values.** Name, missing count, missing percent, filled count.
-- **Summary.** One block for numeric stats, one block for the other columns (count, unique, top, frequency).
-- **Top and worst.** Two lists of five rows, labeled so that a higher metric is the top side.
-- **Grouping.** A compact table: category value, count, sum, mean. When `truncated` is true, a line under the table says the list stops at 100 groups.
-- **Dynamics.** A line chart of `sum` by `bucket`. Grain is the `grain` field (`day` or `month`). The sample file is a daily line.
-- **Insights.** Up to five sentences from `items[].text`.
+- **Missing values.** Name, missing count, missing percent with a short meter, filled count.
+- **Summary.** One block for numeric stats, one block for the other columns (count, unique, top, frequency). Each column is a tile with its stats in a label and value grid.
+- **Top and worst.** Two lists of five rows, labeled so that a higher metric is the top side. Each row shows the rank, the metric value, the values of the first two text or category columns, and a bar scaled to the largest value in both lists.
+- **Grouping.** A compact table: category value, count, sum, mean. The sum cell carries a bar scaled to the largest sum. When `truncated` is true, a line under the table says the list stops at 100 groups.
+- **Dynamics.** A line chart of `sum` by `bucket`. Grain is the `grain` field (`day` or `month`), shown as a chip: **Day** / **День** or **Month** / **Месяц**. The sample file is a daily line. The chart has rounded y-axis ticks, the first, middle, and last date under the x-axis (first and last only below 480 px of chart width), a 10% area wash, and a marker with the value on the last point. Pointer hover shows a crosshair and a readout (date and sum) for the nearest bucket. The chart takes keyboard focus: it then shows the last bucket, and the left and right arrow keys move the readout.
+- **Insights.** Up to five sentences from `items[].text`, each with a small icon, fading in one after another.
 
 Numbers in cards use the locale and at most two fraction digits. Dates use the locale's short date. Empty cells render as an em dash.
 
@@ -177,6 +181,42 @@ On a coarse pointer, the bottom-left of the dialog shows a looping hint while th
 
 A button at the bottom-right of the dialog, **Export** / **Экспорт**, opens a format dialog: **Excel**, **CSV**, **JSON**. Confirming it posts the applied body to `POST .../rows/export` and downloads every matching row, not only the visible page.
 
+<a id="visual-style"></a>
+
+## Visual style
+
+The palette comes from Freedom Broker. All colors are CSS custom properties on `:root` in `App.css`; components use the tokens, not raw values.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--brand` | `#009753` | Chart line, meters, icons, focus ring |
+| `--brand-bright` | `#1AE276` | Primary button fill with `--ink` text, glows |
+| `--brand-ink` | `#007A43` | Brand-colored text on white |
+| `--accent` | `#7D8DEE` | Second accent: category badges, hero glow |
+| `--ink` | `#0E1512` | Body text |
+| `--ink-muted` | `#5B6660` | Labels and secondary text |
+| `--canvas` | `#F4F7F5` | Page background |
+| `--surface` | `#FFFFFF` | Cards, panels, dialogs |
+| `--line` | `#E2E8E4` | Card borders, table rules, gridlines |
+
+The type face is Inter, bundled with the page through `@fontsource-variable/inter` so it loads without a font CDN. The system sans is the fallback. Table numbers use tabular figures and align right. Stat-tile values use proportional figures.
+
+The primary action (upload, apply, confirm, report and table export) is the bright green button with dark ink. Format choices in the export dialog are large tiles that fill with the bright green on hover. Secondary actions are white with a hairline border. Every control shows a 2 px `--brand` focus ring on keyboard focus.
+
+### Motion
+
+Motion is CSS only. Durations are 150 ms for hover and press, 250 ms for panels and dialogs, and 450 ms for card entry. Entering elements ease out.
+
+- A card rises 12 px and fades in when it appears. Its content fades in when the response replaces the skeleton.
+- Skeletons shimmer from left to right.
+- The sidebar slides in from the right edge, and its scrim fades in.
+- Dialogs and the data window fade in and scale up from 96%.
+- The dynamics line draws from left to right once per response.
+- The export pill and circle change width smoothly.
+- The language thumb slides between `RU` and `EN`.
+
+Under `prefers-reduced-motion: reduce` every animation and transition is turned off. The export cooldown arc still changes, because it tells the user when the button works again, but it steps instead of draining smoothly.
+
 <a id="strings"></a>
 
 ## Chrome strings
@@ -188,6 +228,11 @@ A button at the bottom-right of the dialog, **Export** / **Экспорт**, ope
 | `upload.replace` | Replace file | Заменить файл |
 | `upload.tooLarge` | The file is larger than 100 MB. | Файл больше 100 МБ. |
 | `upload.unsupported` | This file type is not supported. | Этот тип файла не поддерживается. |
+| `upload.title` | Drop a file to build the report | Перетащите файл, чтобы построить отчёт |
+| `upload.hint` | CSV, TSV, XLSX, XLS, JSON or Parquet · up to 100 MB | CSV, TSV, XLSX, XLS, JSON или Parquet · до 100 МБ |
+| `upload.replaceHint` | or drop a new file here | или перетащите новый файл сюда |
+| `card.day` | Day | День |
+| `card.month` | Month | Месяц |
 | `settings.open` | Data settings | Настройки данных |
 | `settings.apply` | Apply | Применить |
 | `settings.matchAll` | Match all | Все условия |
